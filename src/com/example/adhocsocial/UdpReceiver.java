@@ -57,6 +57,7 @@ public class UdpReceiver implements Runnable {
 
 	private volatile boolean keepRunning = true;
 	private Thread udpReceiverthread;
+	private Thread timerThread;
 	
 	private DatagramPacket packet;
 	private Packet msgPacket;
@@ -82,12 +83,18 @@ public class UdpReceiver implements Runnable {
 		keepRunning = true;
 		udpReceiverthread = new Thread(this);
 		udpReceiverthread.start();
+		
+		receivedQueue.clear();
+		timerThread = new Thread(this);
+		timerThread.start();
 	}
 
 	public void stopThread(){
 		keepRunning = false;
 		mDatagramSocket.close();
 		udpReceiverthread.interrupt();
+		
+		timerThread.interrupt();
 	}
 
 	public void run(){
@@ -150,13 +157,15 @@ public class UdpReceiver implements Runnable {
 	
 	Runnable timer = new Runnable(){
 		public void run(){
-			try {
-				Thread.sleep(RUN_INCREMENT);
-				currentTime += (RUN_INCREMENT/1000.0);
-				refreshReceivedList();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			while(keepRunning){
+				try {
+					Thread.sleep(RUN_INCREMENT);
+					currentTime += (RUN_INCREMENT/1000.0);
+					refreshReceivedList();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	};

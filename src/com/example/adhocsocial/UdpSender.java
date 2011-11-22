@@ -72,6 +72,7 @@ public class UdpSender implements Runnable{
 	public void startThread(){
 		keepRunning = true;
 		udpSenderthread = new Thread(this);
+		sentQueue.clear();
 		udpSenderthread.start();
 	}
 	
