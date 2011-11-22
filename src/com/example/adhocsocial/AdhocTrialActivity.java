@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -32,6 +33,7 @@ public class AdhocTrialActivity extends Activity {
 	private volatile boolean runCheck = false;
 	private volatile Packet receivedPacket;
 	private Thread checkThread;
+	final Handler mHandler = new Handler();
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -140,7 +142,7 @@ public class AdhocTrialActivity extends Activity {
     			p = control.getNextPacket();
     			if (p != null){
     				receivedPacket = p;
-    				runOnUiThread(updateText);
+    				mHandler.post(updateText);
     			}
     			try {
 					Thread.sleep(100);
@@ -154,8 +156,21 @@ public class AdhocTrialActivity extends Activity {
     
     Runnable updateText = new Runnable(){
 		public void run(){
-			final EditText text = (EditText) findViewById(R.id.editText1);
-			text.setText(receivedPacket.getMessage());
+			//try {
+				//Thread.sleep(100);
+			
+				EditText text = (EditText) findViewById(R.id.editText1);
+				
+				//Thread.sleep(100);
+				
+				text.setText(receivedPacket.getMessage());
+			
+				//Thread.sleep(100);
+				
+			//} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			//}
 		}
 	};
     

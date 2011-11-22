@@ -115,19 +115,21 @@ public class UdpReceiver implements Runnable {
 				 * If the packet we receive is not for us, put in send queue (to be forwarded)
 				 */
 			    String s = msgPacket.getEthernetHeader().getSource();
-			    if(msgPacket.getEthernetHeader().getSource().equals("")){
-			    	//This is a broadcast message
-			    	receiveQueue.add(msgPacket);
-			    	sendQueue.add(msgPacket);
-			    }
-			    else
-			    {
-					if (msgPacket.getEthernetHeader().getSource().equals(myAddress))
-						receiveQueue.add(msgPacket);
-					else{
-						msgPacket.incrementHop();
-						sendQueue.add(msgPacket);
-					}
+			    if (!msgPacket.getEthernetHeader().getSource().equals(myAddress)){
+				    if(msgPacket.getEthernetHeader().getDestination().equals("")){
+				    	//This is a broadcast message
+				    	receiveQueue.add(msgPacket);
+				    	sendQueue.add(msgPacket);
+				    }
+				    else
+				    {
+						if (msgPacket.getEthernetHeader().getDestination().equals(myAddress))
+							receiveQueue.add(msgPacket);
+						else{
+							msgPacket.incrementHop();
+							sendQueue.add(msgPacket);
+						}
+				    }
 			    }
 			} catch (IOException e) {
 				e.printStackTrace();

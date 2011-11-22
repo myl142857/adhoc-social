@@ -1,6 +1,9 @@
 package com.example.adhocsocial;
 
-public class PacketHeader {
+import java.io.Serializable;
+
+public class PacketHeader implements Serializable {
+
 	//unique identifier for each packet from me
 	private int packetID;
 	private static int lastID = -1;

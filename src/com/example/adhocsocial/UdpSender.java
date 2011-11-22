@@ -33,6 +33,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.Queue;
 
 //import org.hfoss.posit.rwg.RwgPacket;
@@ -55,7 +56,7 @@ public class UdpSender implements Runnable{
 	private Thread udpSenderthread;
 	
 	private volatile Queue<Packet> sendQueue;
-	private Queue<PacketHeader> sentQueue;
+	private Queue<PacketHeader> sentQueue = new LinkedList<PacketHeader>();
 	
 	private DatagramSocket datagramSocket;	
 	private InetAddress group;
@@ -164,8 +165,14 @@ public class UdpSender implements Runnable{
 	}
 	
 	private void refreshSentList(){
-		while(sentQueue.peek().getSentTime() + 30 < currentTime){
+		PacketHeader h = sentQueue.peek();
+		if (h == null)
+			return;
+		while(h.getSentTime() + 30 < currentTime){
 			sentQueue.remove();
+			h = sentQueue.peek();
+			if (h == null)
+				return;
 		}
 	}
 

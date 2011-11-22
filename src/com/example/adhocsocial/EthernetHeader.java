@@ -12,10 +12,6 @@ import java.io.Serializable;
 import android.util.Log;
 
 public class EthernetHeader implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Adhoc";
 	
