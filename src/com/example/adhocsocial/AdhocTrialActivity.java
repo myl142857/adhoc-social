@@ -156,21 +156,9 @@ public class AdhocTrialActivity extends Activity {
     
     Runnable updateText = new Runnable(){
 		public void run(){
-			//try {
-				//Thread.sleep(100);
+			EditText text = (EditText) findViewById(R.id.editText1);
+			text.setText(receivedPacket.getMessage());
 			
-				EditText text = (EditText) findViewById(R.id.editText1);
-				
-				//Thread.sleep(100);
-				
-				text.setText(receivedPacket.getMessage());
-			
-				//Thread.sleep(100);
-				
-			//} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-			//}
 		}
 	};
     

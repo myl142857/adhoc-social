@@ -30,7 +30,8 @@ public class PacketHeader implements Serializable {
 	public boolean equals(PacketHeader p){
 		return (ethrHeader.equals(p.ethrHeader) && maxHop == p.maxHop &&
 				currentHop == p.currentHop && maxTime == p.maxTime &&
-				type.equals(p.type) && application.equals(p.application));
+				type.equals(p.type) && application.equals(p.application) &&
+				packetID == p.packetID);
 	}
 	
 	private void setID(){

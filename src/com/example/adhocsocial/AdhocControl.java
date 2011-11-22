@@ -88,6 +88,7 @@ public class AdhocControl {
 		if (!started) return true;
 		main.stopAdhocService();
 		udpR.stopThread();
+		udpS.stopThread();
 		started = false;
 		return true;
 	}

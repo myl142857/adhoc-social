@@ -119,6 +119,7 @@ public class UdpReceiver implements Runnable {
 				    if(msgPacket.getEthernetHeader().getDestination().equals("")){
 				    	//This is a broadcast message
 				    	receiveQueue.add(msgPacket);
+				    	msgPacket.incrementHop();
 				    	sendQueue.add(msgPacket);
 				    }
 				    else
