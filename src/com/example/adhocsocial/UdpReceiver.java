@@ -32,6 +32,7 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
 import java.util.Queue;
 
 //import org.hfoss.posit.rwg.RwgReceiver;
@@ -48,6 +49,7 @@ import android.widget.EditText;
  *
  */
 public class UdpReceiver implements Runnable {
+	private static final int RUN_INCREMENT = 100;
 	private static final String TAG = "Adhoc";
 
 	private DatagramSocket mDatagramSocket;
@@ -58,9 +60,11 @@ public class UdpReceiver implements Runnable {
 	
 	private DatagramPacket packet;
 	private Packet msgPacket;
+	private double currentTime=0;
 	
 	private volatile Queue<Packet> sendQueue;
 	private volatile Queue<Packet> receiveQueue;
+	private Queue<PacketHeader> receivedQueue = new LinkedList<PacketHeader>();
 	
 	private static String myAddress="";
 
@@ -115,7 +119,8 @@ public class UdpReceiver implements Runnable {
 				 * If the packet we receive is not for us, put in send queue (to be forwarded)
 				 */
 			    String s = msgPacket.getEthernetHeader().getSource();
-			    if (!msgPacket.getEthernetHeader().getSource().equals(myAddress)){
+			    if (!msgPacket.getEthernetHeader().getSource().equals(myAddress) && 
+			    		!packetReceived(msgPacket.getHeader())){
 				    if(msgPacket.getEthernetHeader().getDestination().equals("")){
 				    	//This is a broadcast message
 				    	receiveQueue.add(msgPacket);
@@ -143,7 +148,47 @@ public class UdpReceiver implements Runnable {
 		Log.i(TAG, " Exiting the receiver loop");
 	}
 	
+	Runnable timer = new Runnable(){
+		public void run(){
+			try {
+				Thread.sleep(RUN_INCREMENT);
+				currentTime += (RUN_INCREMENT/1000.0);
+				refreshReceivedList();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	};
+	
 	public static void setMyAddress(String addr){
 		myAddress = addr;
+	}
+	
+	private boolean packetReceived(PacketHeader p){
+		boolean result = false;
+		int queueLength = receivedQueue.size();
+		if (queueLength <= 0) return false;
+		PacketHeader check;
+		for (int i=0; i < queueLength; i++){
+			check = receivedQueue.remove();
+			if (check.equals(p)){
+				result =  true;
+			}
+			receivedQueue.add(check);
+		}
+		return result;
+	}
+	
+	private void refreshReceivedList(){
+		PacketHeader h = receivedQueue.peek();
+		if (h == null)
+			return;
+		while(h.getSentTime() + 30 < currentTime){
+			receivedQueue.remove();
+			h = receivedQueue.peek();
+			if (h == null)
+				return;
+		}
 	}
 }
