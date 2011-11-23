@@ -35,6 +35,7 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.*;
 
 //import org.hfoss.posit.rwg.RwgPacket;
 
@@ -50,23 +51,23 @@ import android.util.Log;
  */
 public class UdpSender implements Runnable{
 	private static final String TAG = "Adhoc";
-	private static final int RUN_INCREMENT = 100;
+	private static final int RUN_INCREMENT = 10;
 
 	private volatile boolean keepRunning = true;
 	private Thread udpSenderthread;
 	
 	private volatile Queue<Packet> sendQueue;
-	private Queue<PacketHeader> sentQueue = new LinkedList<PacketHeader>();
+	private Queue<Object[]> sentQueue = new LinkedList<Object[]>();
 	
 	private DatagramSocket datagramSocket;	
 	private InetAddress group;
 	
-	private double currentTime;
+	private volatile int currentTicks;
 	
 	public UdpSender(Queue<Packet> sendQueue) throws SocketException, UnknownHostException, BindException{
 	    datagramSocket = new DatagramSocket(8881);
 	    this.sendQueue = sendQueue;
-	    currentTime = 0;
+	    currentTicks = 0;
 	}
 	
 	public void startThread(){
@@ -96,8 +97,10 @@ public class UdpSender implements Runnable{
 
 		if (payload.length <= AdhocService.MAX_PACKET_SIZE) {
 			broadcast(payload);
-			packet.getHeader().setSentTime(currentTime);
-			sentQueue.add(packet.getHeader());
+			Object[] pair = new Object[2];
+			pair[0] = packet.getHeader();
+			pair[1] = (Double)(currentTicks*RUN_INCREMENT/1000.0);
+			sentQueue.add(pair);
 			return true; 
 		} else {
 			Log.e(TAG, " sendPacket:  Packet length=" + payload.length + " exceeds max size, not sent");
@@ -151,13 +154,14 @@ public class UdpSender implements Runnable{
 	}
 	
 	private boolean packetSent(PacketHeader p){
+		refreshSentList();
 		boolean result = false;
 		int queueLength = sentQueue.size();
 		if (queueLength <= 0) return false;
-		PacketHeader check;
+		Object[] check;
 		for (int i=0; i < queueLength; i++){
 			check = sentQueue.remove();
-			if (check.equals(p)){
+			if (((PacketHeader)check[0]).equals(p)){
 				result =  true;
 			}
 			sentQueue.add(check);
@@ -166,10 +170,10 @@ public class UdpSender implements Runnable{
 	}
 	
 	private void refreshSentList(){
-		PacketHeader h = sentQueue.peek();
+		Object[] h = sentQueue.peek();
 		if (h == null)
 			return;
-		while(h.getSentTime() + 30 < currentTime){
+		while(((Double)h[1] + 30.0) < (currentTicks*RUN_INCREMENT/1000.0)){
 			sentQueue.remove();
 			h = sentQueue.peek();
 			if (h == null)
@@ -187,11 +191,7 @@ public class UdpSender implements Runnable{
 					 * Need to check here if packet was already previously sent
 					 * Within the last 30 seconds
 					 * 
-					 * First use currentTime to clear the list of stale headers
-					 * 
 					 */
-					refreshSentList();
-					
 					p = sendQueue.remove();
 					if (p.okToSend() && !packetSent(p.getHeader()))
 						sendPacket(p);
@@ -202,7 +202,7 @@ public class UdpSender implements Runnable{
 			}
 			try {
 				Thread.sleep(RUN_INCREMENT);
-				currentTime += (RUN_INCREMENT/1000.0);
+				currentTicks++;
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -16,8 +16,6 @@ public class PacketHeader implements Serializable {
 	private String type;	//message type
 	private String application; //application name for this message	
 	
-	private double sentTime;
-	
 	public PacketHeader(){
 		setID();
 		maxHop = 1;
@@ -88,13 +86,5 @@ public class PacketHeader implements Serializable {
 	
 	public String getApplication(){
 		return application;
-	}
-	
-	public void setSentTime(double t){
-		sentTime = t;
-	}
-	
-	public double getSentTime(){
-		return sentTime;
 	}
 }

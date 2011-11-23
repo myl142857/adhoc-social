@@ -49,7 +49,6 @@ import android.widget.EditText;
  *
  */
 public class UdpReceiver implements Runnable {
-	private static final int RUN_INCREMENT = 100;
 	private static final String TAG = "Adhoc";
 
 	private DatagramSocket mDatagramSocket;
@@ -57,19 +56,30 @@ public class UdpReceiver implements Runnable {
 
 	private volatile boolean keepRunning = true;
 	private Thread udpReceiverthread;
-	private Thread timerThread;
 	
 	private DatagramPacket packet;
 	private Packet msgPacket;
-	private double currentTime=0;
 	
 	private volatile Queue<Packet> sendQueue;
 	private volatile Queue<Packet> receiveQueue;
-	private Queue<PacketHeader> receivedQueue = new LinkedList<PacketHeader>();
+	private Queue<Object[]> receivedQueue = new LinkedList<Object[]>();
+	private TimeKeeper time;
+	private boolean timerOwned = false;
 	
 	private static String myAddress="";
 
 	public UdpReceiver(Queue<Packet> sendQueue, Queue<Packet> receiveQueue) throws SocketException, UnknownHostException, BindException {
+		TimeKeeper t = new TimeKeeper(100);
+		timerOwned = true;
+		int port = AdhocService.DEFAULT_PORT_BCAST;
+		mDatagramSocket = new DatagramSocket(port);
+		mDatagramSocket.setSoTimeout(0);            // Infinite timeout;
+		this.sendQueue = sendQueue;
+		this.receiveQueue = receiveQueue;
+		this.time = t;
+	}
+
+	public UdpReceiver(Queue<Packet> sendQueue, Queue<Packet> receiveQueue, TimeKeeper time) throws SocketException, UnknownHostException, BindException {
 		//this.parent = parent;
 		int port = AdhocService.DEFAULT_PORT_BCAST;
 		mDatagramSocket = new DatagramSocket(port);
@@ -77,6 +87,8 @@ public class UdpReceiver implements Runnable {
 		//mDatagramSocket.connect(InetAddress.getByName("192.168.2.255"), 8888);
 		this.sendQueue = sendQueue;
 		this.receiveQueue = receiveQueue;
+		this.time = time;
+		timerOwned = false;
 	}
 
 	public void startThread(){
@@ -85,8 +97,8 @@ public class UdpReceiver implements Runnable {
 		udpReceiverthread.start();
 		
 		receivedQueue.clear();
-		timerThread = new Thread(this);
-		timerThread.start();
+		if (timerOwned)
+			time.startTimer();
 	}
 
 	public void stopThread(){
@@ -94,7 +106,8 @@ public class UdpReceiver implements Runnable {
 		mDatagramSocket.close();
 		udpReceiverthread.interrupt();
 		
-		timerThread.interrupt();
+		if (timerOwned)
+			time.stopTimer();
 	}
 
 	public void run(){
@@ -130,14 +143,14 @@ public class UdpReceiver implements Runnable {
 			    		!packetReceived(msgPacket.getHeader())){
 				    if(msgPacket.getEthernetHeader().getDestination().equals("")){
 				    	//This is a broadcast message
-				    	receiveQueue.add(msgPacket);
+				    	addToReceiveQueue(msgPacket);
 				    	msgPacket.incrementHop();
 				    	sendQueue.add(msgPacket);
 				    }
 				    else
 				    {
 						if (msgPacket.getEthernetHeader().getDestination().equals(myAddress))
-							receiveQueue.add(msgPacket);
+							addToReceiveQueue(msgPacket);
 						else{
 							msgPacket.incrementHop();
 							sendQueue.add(msgPacket);
@@ -155,33 +168,27 @@ public class UdpReceiver implements Runnable {
 		Log.i(TAG, " Exiting the receiver loop");
 	}
 	
-	Runnable timer = new Runnable(){
-		public void run(){
-			while(keepRunning){
-				try {
-					Thread.sleep(RUN_INCREMENT);
-					currentTime += (RUN_INCREMENT/1000.0);
-					refreshReceivedList();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-	};
+	private void addToReceiveQueue(Packet p){
+		receiveQueue.add(p);
+		Object[] pair = new Object[2];
+		pair[0] = p.getHeader();
+		pair[1] = time.getSeconds();
+		receivedQueue.add(pair);
+	}
 	
 	public static void setMyAddress(String addr){
 		myAddress = addr;
 	}
 	
 	private boolean packetReceived(PacketHeader p){
+		refreshReceivedList();
 		boolean result = false;
 		int queueLength = receivedQueue.size();
 		if (queueLength <= 0) return false;
-		PacketHeader check;
+		Object check[];
 		for (int i=0; i < queueLength; i++){
 			check = receivedQueue.remove();
-			if (check.equals(p)){
+			if (((PacketHeader)check[0]).equals(p)){
 				result =  true;
 			}
 			receivedQueue.add(check);
@@ -190,10 +197,10 @@ public class UdpReceiver implements Runnable {
 	}
 	
 	private void refreshReceivedList(){
-		PacketHeader h = receivedQueue.peek();
+		Object[] h = receivedQueue.peek();
 		if (h == null)
 			return;
-		while(h.getSentTime() + 30 < currentTime){
+		while(((Double)h[1] + 30.0) < time.getSeconds()){
 			receivedQueue.remove();
 			h = receivedQueue.peek();
 			if (h == null)
