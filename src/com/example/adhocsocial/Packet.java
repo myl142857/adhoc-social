@@ -21,6 +21,7 @@ public class Packet implements Serializable {
 	
 	private PacketHeader header;
 	
+	private String messageType;
 	private String message;  //contains special message
 	
 	
@@ -112,6 +113,14 @@ public class Packet implements Serializable {
 	
 	public PacketHeader getHeader(){
 		return header;
+	}
+	
+	public String getMessageType(){
+		return messageType;
+	}
+	
+	public void setMessageType(String t){
+		messageType = t;
 	}
 	
 	public boolean okToSend(){
