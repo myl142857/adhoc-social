@@ -52,7 +52,7 @@ public class EthernetHeader implements Serializable {
 	}
 
 	public String toString() {
-		return source + ";" + destination;
+		return "  Source: " + source + "\n  Destination: " + destination + "\n";
 	}
 	
 	/**
@@ -84,5 +84,12 @@ public class EthernetHeader implements Serializable {
 		Log.d(TAG, "source = " + data.source);
 		Log.d(TAG, "destination = " + data.destination);
 		return data;
+	}
+	
+	public int getSize(){
+		int size = 0;
+		size += source.length()*2;
+		size += destination.length()*2;
+		return size;
 	}
 }

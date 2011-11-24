@@ -58,6 +58,7 @@ public class AdhocControl {
 	}
 	
 	public AdhocControl(){
+		Logger.startLogger();
 		sendQueue = new LinkedList<Packet>();
 		receiveQueue = new LinkedList<Packet>();
 		time = new TimeKeeper(10);

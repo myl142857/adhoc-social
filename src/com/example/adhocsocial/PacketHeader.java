@@ -87,4 +87,25 @@ public class PacketHeader implements Serializable {
 	public String getApplication(){
 		return application;
 	}
+	
+	public int getSize(){
+		//4 integers so 4*4 bytes to start out with
+		int size = 16;
+		size += type.length()*2;
+		size += application.length()*2;
+		size += ethrHeader.getSize();
+		return size;
+	}
+	
+	public String toString(){
+		String s = "";
+		s += ethrHeader.toString();
+		s += "  Packet ID: " + Integer.toString(packetID) + "\n";
+		s += "  Max Hop: " + Integer.toString(maxHop) + "\n";
+		s += "  Current Hop: " + Integer.toString(currentHop) + "\n";
+		s += "  Max Time: " + Integer.toString(maxTime) + "\n";
+		s += "  Type: " + type + "\n";
+		s += "  Application: " + application + "\n";
+		return s;
+	}
 }

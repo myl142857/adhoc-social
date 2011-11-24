@@ -93,6 +93,7 @@ public class UdpSender implements Runnable{
 	public boolean sendPacket(Packet packet) throws IOException {
 		Log.e(TAG,  " UdpSender: sendPacket() sending data = " + packet);
 
+		Logger.writePacketSent(packet);
 		byte[] payload = packet.writeToBytes();  // Serialize the data (might throw I/O)
 
 		if (payload.length <= AdhocService.MAX_PACKET_SIZE) {
@@ -153,7 +154,7 @@ public class UdpSender implements Runnable{
 		datagramSocket.close();
 	}
 	
-	private boolean packetSent(PacketHeader p){
+	private boolean packetSent(PacketHeader p){	
 		refreshSentList();
 		boolean result = false;
 		int queueLength = sentQueue.size();

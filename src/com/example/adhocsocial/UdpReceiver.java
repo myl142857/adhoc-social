@@ -169,6 +169,7 @@ public class UdpReceiver implements Runnable {
 	}
 	
 	private void addToReceiveQueue(Packet p){
+		Logger.writePacketReceived(p);
 		receiveQueue.add(p);
 		Object[] pair = new Object[2];
 		pair[0] = p.getHeader();

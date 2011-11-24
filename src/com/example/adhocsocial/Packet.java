@@ -117,4 +117,19 @@ public class Packet implements Serializable {
 	public boolean okToSend(){
 		return (header.getMaxHop() > header.getCurrentHop());
 	}
+	
+	public String toString(){
+		int size = this.getSize();
+		String s = "Size = " + Integer.toString(size) + " bytes \n";
+		s += header.toString();
+		s += "  message: " + message + "\n";
+		return s;
+	}
+	
+	public int getSize(){
+		int size = 0;
+		size += message.length()*2;
+		size += header.getSize();
+		return size;
+	}
 }
