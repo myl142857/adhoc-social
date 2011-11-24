@@ -64,8 +64,6 @@ import android.util.Log;
 /**
  * This class was edited from the original class created for the Posit mobile project
  * 
- * make sure tiwlan.ini is located at /data/local/bin/
- * 
  * Original author:
  * @author rmorelli
  *

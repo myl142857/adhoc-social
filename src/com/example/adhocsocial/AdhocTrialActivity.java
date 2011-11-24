@@ -118,6 +118,7 @@ public class AdhocTrialActivity extends Activity {
 			final EditText edtMessage = (EditText) findViewById(R.id.editText2);
 			EthernetHeader ethrHeader = new EthernetHeader(myAddress);
 			Packet p = new Packet(ethrHeader, edtMessage.getText().toString());
+			p.setMaxHop(2);
 			control.sendPacket(p);
 		}
     	
@@ -156,7 +157,7 @@ public class AdhocTrialActivity extends Activity {
     
     Runnable updateText = new Runnable(){
 		public void run(){
-			EditText text = (EditText) findViewById(R.id.editText1);
+			final EditText text = (EditText) findViewById(R.id.editText1);
 			text.setText(receivedPacket.getMessage());
 			
 		}
