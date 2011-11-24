@@ -85,6 +85,7 @@ public class Packet implements Serializable {
 
 	public void incrementHop(){
 		header.incrementHopCount();
+		
 	}
 	
 	public void setMaxHop(int h){

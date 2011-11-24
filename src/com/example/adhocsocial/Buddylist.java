@@ -8,7 +8,7 @@ public class Buddylist{
 	
 //constructors
 	public Buddylist(){
-		bl = new Hashtable();
+		bl = new Hashtable<String, Buddy>();
 	}
 	
 //methods
@@ -27,7 +27,13 @@ public class Buddylist{
 		return temp;
 	}
 	
-	public boolean Ping (String address, double time){
+	/*
+	public static boolean Pong(PingPacket P){
+		
+	}
+	
+	
+	public static boolean Ping (String address, double time){
 		double t = TimeKeeper.getSeconds();
 		boolean ACKRecd = false;
 		//make pingPacket
@@ -45,7 +51,7 @@ public class Buddylist{
 		catch(Exception e){return false;}
 		
 	}
-	
+	*/
 	public void Chat (){
 	}
 
