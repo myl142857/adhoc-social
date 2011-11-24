@@ -38,6 +38,8 @@ public class AdhocControl {
 	private volatile Queue<Packet> sendQueue;
 	private volatile Queue<Packet> receiveQueue;
 	
+	private Buddylist buddylist;
+	
 	private UdpReceiver udpR;
 	private UdpSender udpS;
 	private Thread thr;
@@ -61,6 +63,7 @@ public class AdhocControl {
 		sendQueue = new LinkedList<Packet>();
 		receiveQueue = new LinkedList<Packet>();
 		TimeKeeper.startTimer();
+		buddylist = new Buddylist();
 		
 		try {
         	udpS = new UdpSender(sendQueue);
@@ -100,16 +103,20 @@ public class AdhocControl {
 		return true;
 	}
 	
+	/*
 	public static void packetReceived(Packet p){
 		receivedPacket = p;
 		main.runOnUiThread(updateText);
 	}
+	*/
 	
+	/*
 	static Runnable updateText = new Runnable(){
 		public void run(){
 			text.setText(receivedPacket.getMessage());
 		}
 	};
+	*/
 	
 	public boolean isStarted(){
 		return started;
