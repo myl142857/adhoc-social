@@ -63,32 +63,15 @@ public class UdpReceiver implements Runnable {
 	private volatile Queue<Packet> sendQueue;
 	private volatile Queue<Packet> receiveQueue;
 	private Queue<Object[]> receivedQueue = new LinkedList<Object[]>();
-	private TimeKeeper time;
-	private boolean timerOwned = false;
 	
 	private static String myAddress="";
 
 	public UdpReceiver(Queue<Packet> sendQueue, Queue<Packet> receiveQueue) throws SocketException, UnknownHostException, BindException {
-		TimeKeeper t = new TimeKeeper(100);
-		timerOwned = true;
 		int port = AdhocService.DEFAULT_PORT_BCAST;
 		mDatagramSocket = new DatagramSocket(port);
 		mDatagramSocket.setSoTimeout(0);            // Infinite timeout;
 		this.sendQueue = sendQueue;
 		this.receiveQueue = receiveQueue;
-		this.time = t;
-	}
-
-	public UdpReceiver(Queue<Packet> sendQueue, Queue<Packet> receiveQueue, TimeKeeper time) throws SocketException, UnknownHostException, BindException {
-		//this.parent = parent;
-		int port = AdhocService.DEFAULT_PORT_BCAST;
-		mDatagramSocket = new DatagramSocket(port);
-		mDatagramSocket.setSoTimeout(0);            // Infinite timeout
-		//mDatagramSocket.connect(InetAddress.getByName("192.168.2.255"), 8888);
-		this.sendQueue = sendQueue;
-		this.receiveQueue = receiveQueue;
-		this.time = time;
-		timerOwned = false;
 	}
 
 	public void startThread(){
@@ -97,17 +80,12 @@ public class UdpReceiver implements Runnable {
 		udpReceiverthread.start();
 		
 		receivedQueue.clear();
-		if (timerOwned)
-			time.startTimer();
 	}
 
 	public void stopThread(){
 		keepRunning = false;
 		mDatagramSocket.close();
 		udpReceiverthread.interrupt();
-		
-		if (timerOwned)
-			time.stopTimer();
 	}
 
 	public void run(){
@@ -173,7 +151,7 @@ public class UdpReceiver implements Runnable {
 		receiveQueue.add(p);
 		Object[] pair = new Object[2];
 		pair[0] = p.getHeader();
-		pair[1] = time.getSeconds();
+		pair[1] = TimeKeeper.getSeconds();
 		receivedQueue.add(pair);
 	}
 	
@@ -201,7 +179,7 @@ public class UdpReceiver implements Runnable {
 		Object[] h = receivedQueue.peek();
 		if (h == null)
 			return;
-		while(((Double)h[1] + 30.0) < time.getSeconds()){
+		while(((Double)h[1] + 30.0) < TimeKeeper.getSeconds()){
 			receivedQueue.remove();
 			h = receivedQueue.peek();
 			if (h == null)

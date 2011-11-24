@@ -1,53 +1,45 @@
 package com.example.adhocsocial;
 
-public class TimeKeeper implements Runnable{
-	private int msPerTick;
-	private volatile int currentTicks;
-	private volatile boolean keepRunning = false;
-	private Thread timerThread;
+public class TimeKeeper{
+	private static final int MS_PER_TICK = 10;
+	private static volatile int currentTicks = 0;
+	private static volatile boolean keepRunning = false;
+	private static Thread timerThread;
 	
-	public TimeKeeper(){
-		currentTicks = 0;
-		msPerTick = 100;
-	}
-	
-	public TimeKeeper(int msPerTick){
-		currentTicks = 0;
-		this.msPerTick = msPerTick;
-	}
-	
-	public void startTimer(){
+	public static void startTimer(){
 		keepRunning = true;
-		timerThread = new Thread(this);
+		timerThread = new Thread(runMe);
 		timerThread.start();
 	}
 	
-	public void stopTimer(){
+	public static void stopTimer(){
 		keepRunning = false;
 		timerThread.interrupt();
 	}
 	
-	public int getTicks(){
+	public static int getTicks(){
 		return currentTicks;
 	}
 	
-	public double getSeconds(){
-		return currentTicks*msPerTick/1000.0;
+	public static double getSeconds(){
+		return currentTicks*MS_PER_TICK/1000.0;
 	}
 	
-	public int getMsPerTick(){
-		return msPerTick;
+	public static int getMsPerTick(){
+		return MS_PER_TICK;
 	}
 	
-	public void run(){
-		while(keepRunning){
-			try {
-				Thread.sleep(msPerTick);
-				currentTicks++;
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+	public static Runnable runMe = new Runnable(){
+		public void run(){
+			while(keepRunning){
+				try {
+					Thread.sleep(MS_PER_TICK);
+					currentTicks++;
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
-	}
+	};
 }
