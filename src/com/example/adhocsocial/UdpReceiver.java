@@ -119,7 +119,8 @@ public class UdpReceiver implements Runnable {
 				 * If the packet we receive is not for us, put in send queue (to be forwarded)
 				 */
 			    String s = msgPacket.getEthernetHeader().getSource();
-			    if (!msgPacket.getEthernetHeader().getSentFrom().equals(myAddress)){
+			    if (!msgPacket.getEthernetHeader().getSentFrom().equals(myAddress) && 
+			    		!msgPacket.getEthernetHeader().getSource().equals(myAddress)){
 			    	Logger.writePacketReceived(msgPacket);
 			    	msgPacket.incrementHop();
 			    	hopList.addPacket(msgPacket.getHeader());

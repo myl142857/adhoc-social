@@ -31,7 +31,7 @@ import android.widget.TextView;
 public class AdhocTrialActivity extends Activity {
 	private volatile AdhocControl control;
 	private volatile boolean runCheck = false;
-	private volatile Packet receivedPacket;
+	private volatile String msg;
 	private Thread checkThread;
 	final Handler mHandler = new Handler();
     /** Called when the activity is first created. */
@@ -142,7 +142,9 @@ public class AdhocTrialActivity extends Activity {
     		while(runCheck){
     			p = control.getNextPacket();
     			if (p != null){
-    				receivedPacket = p;
+    				msg = p.getMessage() + " | " + 
+    					control.getMinHop(p.getHeader().getEathrnetHeader().getSource(), 
+    							p.getHeader().getPacketID());
     				mHandler.post(updateText);
     			}
     			try {
@@ -158,7 +160,7 @@ public class AdhocTrialActivity extends Activity {
     Runnable updateText = new Runnable(){
 		public void run(){
 			final EditText text = (EditText) findViewById(R.id.editText1);
-			text.setText(receivedPacket.getMessage());
+			text.setText(msg);
 			
 		}
 	};

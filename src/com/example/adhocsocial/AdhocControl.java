@@ -136,4 +136,8 @@ public class AdhocControl {
 			return null;
 		}
 	}
+	
+	public int getMinHop(String addr, int packetID){
+		return hopList.getMinPacketHops(addr, packetID);
+	}
 }

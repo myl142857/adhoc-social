@@ -20,7 +20,7 @@ public class HopList {
 	//number of ms a hop counter becomes stale
 	protected static final int STALE_MS = 120;
 	//Hash table with key = MAC address; value = Queue of hop count & time
-	HashMap<String, Queue<Object[]>> nodeList = new HashMap<String, Queue<Object[]>>();
+	HashMap<String, Queue<HopEntry>> nodeList = new HashMap<String, Queue<HopEntry>>();
 	private double lastClean;
 	private volatile boolean lock;
 	private static String myAddr;
@@ -81,13 +81,12 @@ public class HopList {
 		String source = ph.getEathrnetHeader().getSource();
 		Integer hopCount = ph.getCurrentHop();
 		Double time = TimeKeeper.getSeconds();
-		Object[] newValue = new Object[2];
-		newValue[0] = hopCount;
-		newValue[1] = time;
-		Queue<Object[]> listQueue = (Queue<Object[]>)nodeList.get(source);
+		int id = ph.getPacketID();
+		HopEntry newValue = new HopEntry(id, hopCount, time);
+		Queue<HopEntry> listQueue = (Queue<HopEntry>)nodeList.get(source);
 		Log.i(TAG, "Adding packet to hopList");
 		if (listQueue == null){
-			listQueue = new LinkedList<Object[]>();
+			listQueue = new LinkedList<HopEntry>();
 			listQueue.add(newValue);
 			nodeList.put(source, listQueue);
 			Log.i(TAG, "Unique hop entry saved");
@@ -105,15 +104,15 @@ public class HopList {
 		int cleanCount = 0;
 		retrieveLock();
 		int count = nodeList.size();
-		Object[] entry;
-		Queue<Object[]> listQueue;
-		Iterator<Map.Entry<String, Queue<Object[]>>> iterator = nodeList.entrySet().iterator();
-		Map.Entry<String, Queue<Object[]>> itEntry;
+		HopEntry entry;
+		Queue<HopEntry> listQueue;
+		Iterator<Map.Entry<String, Queue<HopEntry>>> iterator = nodeList.entrySet().iterator();
+		Map.Entry<String, Queue<HopEntry>> itEntry;
 		for (int i = 0; i < count; i++){
 			itEntry = iterator.next();
 			listQueue = itEntry.getValue();
 			entry = listQueue.peek();
-			while (entry != null && (Double)entry[1] + STALE_MS < TimeKeeper.getSeconds()){
+			while (entry != null && entry.getTime() + STALE_MS < TimeKeeper.getSeconds()){
 				listQueue.remove();
 				entry = listQueue.peek();
 				cleanCount++;
@@ -138,14 +137,61 @@ public class HopList {
 			if (!nodeList.containsKey(addr)) return -1;
 		}
 		int minHops = 1000000000;
-		Queue<Object[]> listQueue = nodeList.get(addr);
-		Object[] currentObj;
+		Queue<HopEntry> listQueue = nodeList.get(addr);
+		HopEntry currentObj;
 		int count = listQueue.size();
-		int h;
 		for (int i = 0; i < count; i++){
 			currentObj = listQueue.remove();
-			if ((Integer)currentObj[0] < minHops)
-				minHops = (Integer)currentObj[0];
+			if (currentObj.getHopCount() < minHops)
+				minHops = currentObj.getHopCount();
+			listQueue.add(currentObj);
+		}
+		releaseLock();
+		return minHops;
+	}
+	
+	//gets minimum hops for last packet received
+	public int getMinLastPacketHops(String addr){
+		if (addr.equals(myAddr)) return 0;
+		if (!nodeList.containsKey(addr)) return -1;
+		retrieveLock();
+		int minHops=1000000000;
+		int packetID=-1;
+		Queue<HopEntry> listQueue = nodeList.get(addr);
+		HopEntry currentObj;
+		int count = listQueue.size();
+		//get the last packetID
+		for (int i = 0; i < count; i++){
+			currentObj = listQueue.remove();
+			packetID = currentObj.getPacketID();
+			minHops = currentObj.getHopCount();
+			listQueue.add(currentObj);
+		}
+		//get min hop count for the last packetID
+		for (int i = 0; i < count; i++){
+			currentObj = listQueue.remove();
+			if (currentObj.getPacketID() == packetID && currentObj.getHopCount() < minHops)
+				minHops = currentObj.getHopCount();
+			listQueue.add(currentObj);
+		}
+		releaseLock();
+		return minHops;
+	}
+	
+	//gets minimum hops for given packet ID and source addr
+	public int getMinPacketHops(String addr, int packetID){
+		if (addr.equals(myAddr)) return 0;
+		if (!nodeList.containsKey(addr)) return -1;
+		retrieveLock();
+		int minHops=1000000000;
+		Queue<HopEntry> listQueue = nodeList.get(addr);
+		HopEntry currentObj;
+		int count = listQueue.size();
+		//get min hop count for the last packetID
+		for (int i = 0; i < count; i++){
+			currentObj = listQueue.remove();
+			if (currentObj.getPacketID() == packetID && currentObj.getHopCount() < minHops)
+				minHops = currentObj.getHopCount();
 			listQueue.add(currentObj);
 		}
 		releaseLock();
@@ -155,5 +201,29 @@ public class HopList {
 	//sets my address so if my address is asked for in the above function, 0 will always be returned
 	public static void setMyAddr(String addr){
 		myAddr = addr;
+	}
+	
+	private class HopEntry{
+		int packetID;
+		int hopCount;
+		double time;
+		
+		public HopEntry(int id, int hops, double time){
+			this.packetID = id;
+			this.hopCount = hops;
+			this.time = time;
+		}
+		
+		public int getPacketID(){
+			return packetID;
+		}
+		
+		public int getHopCount(){
+			return hopCount;
+		}
+		
+		public double getTime(){
+			return time;
+		}
 	}
 }
