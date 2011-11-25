@@ -3,7 +3,10 @@ package com.example.adhocsocial;
 import java.io.Serializable;
 
 public class PacketHeader implements Serializable {
-
+	public static final String TYPE_ACK = "ack";
+	public static final String TYPE_DAT = "dat";
+	public static final String TYPE_REQ = "req";
+	
 	//unique identifier for each packet from me
 	private int packetID;
 	private static int lastID = -1;

@@ -15,8 +15,12 @@ public class EthernetHeader implements Serializable {
 
 	public static final String TAG = "Adhoc";
 	
+	//where this packet originally came from
 	private String source;
+	//where this packet is destined for
 	private String destination; //If destination is "" then it is a broadcast message for everyone
+	//where this packet was sent from (ie. if it came from a hop this will not = source)
+	private String sentFrom;
 	
 	public EthernetHeader (String source, String destination) {
 		this.source = source;
@@ -40,7 +44,14 @@ public class EthernetHeader implements Serializable {
 	public void setSource(String source) {
 		this.source = source;
 	}
-
+	
+	public void setSentFrom(String addr){
+		this.sentFrom = addr;
+	}
+	
+	public String getSentFrom(){
+		return this.sentFrom;
+	}
 
 	public String getDestination() {
 		return destination;
@@ -52,7 +63,8 @@ public class EthernetHeader implements Serializable {
 	}
 
 	public String toString() {
-		return "  Source: " + source + "\n  Destination: " + destination + "\n";
+		return "  Source: " + source + "\n  Destination: " + destination + "\n" +
+				"  Sent From: " + sentFrom;
 	}
 	
 	/**

@@ -29,6 +29,10 @@ public class Buddy{
 		return name;
 	}
 	
+	public void setHops(int h){
+		minHops = h;
+	}
+	
 	public int getHops(){
 		return minHops;
 	}
@@ -37,5 +41,7 @@ public class Buddy{
 		return lastTimeUpdated;
 	}
 	
-	
+	public void update(){
+		lastTimeUpdated = TimeKeeper.getSeconds();
+	}
 }

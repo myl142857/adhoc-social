@@ -32,9 +32,6 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.*;
 
 //import org.hfoss.posit.rwg.RwgPacket;
@@ -63,6 +60,8 @@ public class UdpSender implements Runnable{
 	private InetAddress group;
 	
 	private volatile int currentTicks;
+	
+	private static String myAddress="";
 	
 	public UdpSender(Queue<Packet> sendQueue) throws SocketException, UnknownHostException, BindException{
 	    datagramSocket = new DatagramSocket(8881);
@@ -93,6 +92,7 @@ public class UdpSender implements Runnable{
 	public boolean sendPacket(Packet packet) throws IOException {
 		Log.e(TAG,  " UdpSender: sendPacket() sending data = " + packet);
 
+		packet.getEthernetHeader().setSentFrom(myAddress);
 		Logger.writePacketSent(packet);
 		byte[] payload = packet.writeToBytes();  // Serialize the data (might throw I/O)
 
@@ -209,5 +209,9 @@ public class UdpSender implements Runnable{
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static void setMyAddress(String addr){
+		myAddress = addr;
 	}
 }

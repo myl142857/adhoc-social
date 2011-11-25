@@ -43,6 +43,7 @@ public class AdhocControl {
 	private UdpReceiver udpR;
 	private UdpSender udpS;
 	private Thread thr;
+	private HopList hopList;
 	private boolean started = false;
 	
 	private static AdhocTrialActivity main;
@@ -64,10 +65,11 @@ public class AdhocControl {
 		receiveQueue = new LinkedList<Packet>();
 		TimeKeeper.startTimer();
 		buddylist = new Buddylist();
+		hopList = new HopList();
 		
 		try {
         	udpS = new UdpSender(sendQueue);
-        	udpR = new UdpReceiver(sendQueue, receiveQueue);
+        	udpR = new UdpReceiver(sendQueue, receiveQueue, hopList);
 		} catch (BindException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -63,15 +63,17 @@ public class UdpReceiver implements Runnable {
 	private volatile Queue<Packet> sendQueue;
 	private volatile Queue<Packet> receiveQueue;
 	private Queue<Object[]> receivedQueue = new LinkedList<Object[]>();
+	private HopList hopList;
 	
 	private static String myAddress="";
 
-	public UdpReceiver(Queue<Packet> sendQueue, Queue<Packet> receiveQueue) throws SocketException, UnknownHostException, BindException {
+	public UdpReceiver(Queue<Packet> sendQueue, Queue<Packet> receiveQueue, HopList hopList) throws SocketException, UnknownHostException, BindException {
 		int port = AdhocService.DEFAULT_PORT_BCAST;
 		mDatagramSocket = new DatagramSocket(port);
 		mDatagramSocket.setSoTimeout(0);            // Infinite timeout;
 		this.sendQueue = sendQueue;
 		this.receiveQueue = receiveQueue;
+		this.hopList = hopList;
 	}
 
 	public void startThread(){
@@ -117,22 +119,24 @@ public class UdpReceiver implements Runnable {
 				 * If the packet we receive is not for us, put in send queue (to be forwarded)
 				 */
 			    String s = msgPacket.getEthernetHeader().getSource();
-			    if (!msgPacket.getEthernetHeader().getSource().equals(myAddress) && 
-			    		!packetReceived(msgPacket.getHeader())){
-				    if(msgPacket.getEthernetHeader().getDestination().equals("")){
-				    	//This is a broadcast message
-				    	addToReceiveQueue(msgPacket);
-				    	msgPacket.incrementHop();
-				    	sendQueue.add(msgPacket);
-				    }
-				    else
-				    {
-						if (msgPacket.getEthernetHeader().getDestination().equals(myAddress))
-							addToReceiveQueue(msgPacket);
-						else{
-							msgPacket.incrementHop();
-							sendQueue.add(msgPacket);
-						}
+			    if (!msgPacket.getEthernetHeader().getSentFrom().equals(myAddress)){
+			    	Logger.writePacketReceived(msgPacket);
+			    	msgPacket.incrementHop();
+			    	hopList.addPacket(msgPacket.getHeader());
+				    if (!packetReceived(msgPacket.getHeader())){
+					    if(msgPacket.getEthernetHeader().getDestination().equals("")){
+					    	//This is a broadcast message
+					    	addToReceiveQueue(msgPacket);
+					    	sendQueue.add(msgPacket);
+					    }
+					    else
+					    {
+							if (msgPacket.getEthernetHeader().getDestination().equals(myAddress))
+								addToReceiveQueue(msgPacket);
+							else{
+								sendQueue.add(msgPacket);
+							}
+					    }
 				    }
 			    }
 			} catch (IOException e) {
@@ -147,7 +151,6 @@ public class UdpReceiver implements Runnable {
 	}
 	
 	private void addToReceiveQueue(Packet p){
-		Logger.writePacketReceived(p);
 		receiveQueue.add(p);
 		Object[] pair = new Object[2];
 		pair[0] = p.getHeader();
