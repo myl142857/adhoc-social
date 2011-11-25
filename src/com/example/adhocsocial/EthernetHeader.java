@@ -32,6 +32,7 @@ public class EthernetHeader implements Serializable {
 		this.destination = "";
 	}
 	
+	//don't check the 'sentFrom' to see if it is equal
 	public boolean equals(EthernetHeader e){
 		return (source.equals(e.source) && destination.equals(e.destination));
 	}
@@ -63,8 +64,12 @@ public class EthernetHeader implements Serializable {
 	}
 
 	public String toString() {
-		return "  Source: " + source + "\n  Destination: " + destination + "\n" +
+		return "  Source: " + source + "\r\n  Destination: " + destination + "\r\n" +
 				"  Sent From: " + sentFrom;
+	}
+	
+	public String toXlsString(){
+		return "'"+sentFrom + "\t" + "'"+source + "\t" + "'"+destination;
 	}
 	
 	/**

@@ -103,12 +103,24 @@ public class PacketHeader implements Serializable {
 	public String toString(){
 		String s = "";
 		s += ethrHeader.toString();
-		s += "  Packet ID: " + Integer.toString(packetID) + "\n";
-		s += "  Max Hop: " + Integer.toString(maxHop) + "\n";
-		s += "  Current Hop: " + Integer.toString(currentHop) + "\n";
-		s += "  Max Time: " + Integer.toString(maxTime) + "\n";
-		s += "  Type: " + type + "\n";
-		s += "  Application: " + application + "\n";
+		s += "  Packet ID: " + Integer.toString(packetID) + "\r\n";
+		s += "  Max Hop: " + Integer.toString(maxHop) + "\r\n";
+		s += "  Current Hop: " + Integer.toString(currentHop) + "\r\n";
+		s += "  Max Time: " + Integer.toString(maxTime) + "\r\n";
+		s += "  Type: " + type + "\r\n";
+		s += "  Application: " + application + "\r\n";
+		return s;
+	}
+	
+	public String toXlsString(){
+		String s = "";
+		s += ethrHeader.toXlsString();
+		s += "\t" + Integer.toString(packetID);
+		s += "\t" + Integer.toString(maxHop);
+		s += "\t" + Integer.toString(currentHop);
+		s += "\t" + Integer.toString(maxTime);
+		s += "\t" + type;
+		s += "\t" + application;
 		return s;
 	}
 }

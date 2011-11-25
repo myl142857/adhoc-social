@@ -27,12 +27,16 @@ public class Packet implements Serializable {
 	
 	public Packet(){
 		header = new PacketHeader();
+		message = "";
+		messageType = "";
 	}
 
 	public Packet(EthernetHeader ethrHeader, String data) {
 		header = new PacketHeader();
 		this.header.setEthrHeader(ethrHeader);
 		message = data;
+		message = "";
+		messageType = "";
 	}
 
 	public String getMessage(){
@@ -130,9 +134,20 @@ public class Packet implements Serializable {
 	
 	public String toString(){
 		int size = this.getSize();
-		String s = "Size = " + Integer.toString(size) + " bytes \n";
+		String s = "Size = " + Integer.toString(size) + " bytes \r\n";
 		s += header.toString();
-		s += "  message: " + message + "\n";
+		s += "  Message Type: " + messageType + "\r\n";
+		s += "  Message: " + message + "\r\n";
+		return s;
+	}
+	
+	public String toXlsString(){
+		int size = this.getSize();
+		String s = "";
+		s += Integer.toString(size);
+		s += "\t" + header.toXlsString();
+		s += "\t" + messageType;
+		s += "\t" + message;
 		return s;
 	}
 	
