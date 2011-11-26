@@ -25,8 +25,16 @@ public class Buddy{
 		return address;
 	}
 	
+	public void setAddress(String a){
+		address = a;
+	}
+	
 	public String getName(){
 		return name;
+	}
+	
+	public void setName(String n){
+		name = n;
 	}
 	
 	public void setHops(int h){
