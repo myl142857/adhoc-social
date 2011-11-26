@@ -46,7 +46,6 @@ public class AdhocTrialActivity extends Activity {
     final ListView lstBuddies = (ListView)findViewById(R.id.lstBuddies);
     private AdhocTrialActivity me;
     private Thread textUpdate;
-    private String msg;
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,6 +64,8 @@ public class AdhocTrialActivity extends Activity {
         		startAdhocService();
         		control.startAdhoc(txtName.getText().toString());
         		refreshControls();
+        		textUpdate = new Thread(update);
+        		textUpdate.start();
         	}
         });
         
@@ -130,22 +131,23 @@ public class AdhocTrialActivity extends Activity {
     
     private Runnable update = new Runnable(){
     	public void run(){
-    		if (control.chatUpdated()){
-    			msg = control.getChatMessages();
-    			mHandler.post(setText);
+    		while (true){
+	    		if (control.chatUpdated()){
+	    			mHandler.post(setText);
+	    		}
+	    		try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
     		}
-    		try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
     	}
     };
     
     private Runnable setText = new Runnable(){
     	public void run(){
-    		txtMessages.setText(msg);
+    		txtMessages.setText(control.getChatMessages());
     	}
     };
     
@@ -169,6 +171,7 @@ public class AdhocTrialActivity extends Activity {
 		Intent serviceIntent = new Intent();
 		serviceIntent.setClass(this, AdhocService.class);
 		startService(serviceIntent);
+		
 	}
     
     public void stopAdhocService() {
