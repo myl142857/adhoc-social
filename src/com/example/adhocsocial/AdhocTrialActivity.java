@@ -45,6 +45,8 @@ public class AdhocTrialActivity extends Activity {
     final Button btnCancel = (Button)findViewById(R.id.btnCancel);
     final ListView lstBuddies = (ListView)findViewById(R.id.lstBuddies);
     private AdhocTrialActivity me;
+    private Thread textUpdate;
+    private String msg;
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -125,6 +127,27 @@ public class AdhocTrialActivity extends Activity {
         	
 		});
     }
+    
+    private Runnable update = new Runnable(){
+    	public void run(){
+    		if (control.chatUpdated()){
+    			msg = control.getChatMessages();
+    			mHandler.post(setText);
+    		}
+    		try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+    };
+    
+    private Runnable setText = new Runnable(){
+    	public void run(){
+    		txtMessages.setText(msg);
+    	}
+    };
     
     private void setView(int view){
     	control.setView(view);

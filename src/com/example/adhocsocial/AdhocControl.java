@@ -184,4 +184,12 @@ public class AdhocControl {
 			chat.addBuddyToChat(b);
 		}
 	}
+	
+	public boolean chatUpdated(){
+		return chat.isUpdated();
+	}
+	
+	public String getChatMessages(){
+		return chat.getMessages();
+	}
 }
