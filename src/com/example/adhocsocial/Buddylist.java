@@ -55,21 +55,31 @@ public class Buddylist{
 	}
 	
 	public void updateList(double refreshRate){
-		Enumeration<E> <String> keysEnum = bl.keys();
-		Enumeration <Buddy>  valsEnum = bl.elements();
 		
-		String address = keysEnum.nextElement();
-		Buddy buddy = valsEnum.nextElement();
+		String address;
+		Buddy temp, buddy;
+		double timePassed;
 		
+		//Enumeration <String> keysEnum = bl.keys();
+		Enumeration <Buddy>  valsEnum = bl.elements();	
+		
+		/*
 		do{
-			Buddy temp = bl.get(address);
-			double timePassed = TimeKeeper.getSeconds() - temp.getLastUpd();
+			address = keysEnum.nextElement();
+			temp = bl.get(address);
+			timePassed = TimeKeeper.getSeconds() - temp.getLastUpd();
 			if (timePassed > refreshRate)
-				this.remove(address);				
+				this.remove(address);
+			else
+				temp.update();
 		}while (keysEnum.hasMoreElements());
+		*/
 		
 		do{
-			
+			buddy = valsEnum.nextElement();
+			timePassed = TimeKeeper.getSeconds() - buddy.getLastUpd();
+			if (timePassed > refreshRate)
+				this.remove(buddy.getAddress());			
 		}while (valsEnum.hasMoreElements());
 		
 	}
