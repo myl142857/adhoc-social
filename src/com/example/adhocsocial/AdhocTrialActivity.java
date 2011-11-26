@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.BindException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
 
 import com.example.adhoctrial.R;
 
@@ -23,134 +24,122 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 
 public class AdhocTrialActivity extends Activity {
 	private volatile AdhocControl control;
+	final Handler mHandler = new Handler();
 	private volatile boolean runCheck = false;
 	private volatile String msg;
 	private Thread checkThread;
-	final Handler mHandler = new Handler();
+	private AdhocTrialActivity me;
+	private Thread textUpdate;
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        
-        final Button btnStart = (Button) findViewById(R.id.btnStart);
-        final Button btnSend = (Button) findViewById(R.id.btnSend);
-        final EditText edtResults = (EditText) findViewById(R.id.txtMessageBox);
-        final EditText edtMessage = (EditText) findViewById(R.id.txtMessage);
-        final EditText txtName = (EditText) findViewById(R.id.nameEntry);
         control = AdhocControl.startControl();
-        if (control.isStarted()){
-        	btnStart.setBackgroundColor(Color.RED);
-        	btnStart.setText("Stop");
-        }
-        else{
-        	btnStart.setBackgroundColor(Color.GREEN);
-        	btnStart.setText("Start");
-        }
+        me = this;
+        if (control.getView() == AdhocControl.VIEW_MAIN)
+        	setContentView(R.layout.main);
+        else
+        	setContentView(R.layout.buddylist);
         
+        final EditText txtName = (EditText)findViewById(R.id.nameEntry);
+    	final Button startButton = (Button)findViewById(R.id.btnStart);
+        final EditText txtMessages = (EditText)findViewById(R.id.txtMessageBox);
+        final EditText txtSendMessage = (EditText)findViewById(R.id.txtMessage);
+        final Button btnSend = (Button)findViewById(R.id.btnSend);
+        final Button btnAdd = (Button)findViewById(R.id.btnAdd);
+        final Button btnRemove = (Button)findViewById(R.id.btnRemove);
+        final Button btnCancel = (Button)findViewById(R.id.btnCancel);
+        final ListView lstBuddies = (ListView)findViewById(R.id.lstBuddies);
         
+        refreshControls();
         
-        btnStart.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				if (control.isStarted()) {
-					//STOP
-					stopAdhocService();
-					control.stopAdhoc();
-					btnStart.setBackgroundColor(Color.GREEN);
-					btnStart.setText("Start");
-					
-					runCheck = false;
-					checkThread.interrupt();
-				}
-				else{
-					//START
-					startAdhocService();
-					control.startAdhoc(txtName.getText().toString());
-					btnStart.setBackgroundColor(Color.RED);
-					btnStart.setText("Stop");
-					
-					runCheck = true;
-					checkThread = new Thread(checkMsg);
-					checkThread.start();
-				}
-				
-			}
-		});
+        startButton.setOnClickListener(new View.OnClickListener(){
+        	public void onClick(View v){
+        		startAdhocService();
+        		control.startAdhoc(txtName.getText().toString());
+        		refreshControls();
+        		textUpdate = new Thread(update);
+        		textUpdate.start();
+        	}
+        });
         
         btnSend.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				if (!control.isStarted()) return;
-				runOnUiThread(sendMsg);
+				control.sendMessage(txtSendMessage.getText().toString());
 			}
 		});
         
-        edtMessage.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        btnAdd.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				if (event == null || event.getAction() == 0){
-					if (!control.isStarted()) return true;
-					runOnUiThread(sendMsg);
-					return true;
+				LinkedList<Buddy> buddies = control.getAvailableBuddies();
+				String lv_arr[] = new String[buddies.size()];
+				for (int i = 0; i<buddies.size();i++){
+					lv_arr[i] = buddies.get(i).getName();
 				}
-				return true;
+				lstBuddies.setAdapter(new ArrayAdapter<String>(me, R.layout.buddylist , lv_arr));
+				setView(AdhocControl.VIEW_LIST);
 			}
 		});
+        
+        btnRemove.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				LinkedList<Buddy> buddies = control.getChatList();
+				String lv_arr[] = new String[buddies.size()];
+				for (int i = 0; i<buddies.size();i++){
+					lv_arr[i] = buddies.get(i).getName();
+				}
+				lstBuddies.setAdapter(new ArrayAdapter<String>(me, R.layout.buddylist , lv_arr));
+				setView(AdhocControl.VIEW_LIST);
+			}
+		});
+        
+        /*btnCancel.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				setView(AdhocControl.VIEW_MAIN);
+			}
+		});
+        
+        lstBuddies.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				// TODO Auto-generated method stub
+				control.indexSelected(arg2);
+			}
+        	
+		});*/
     }
     
-    Runnable sendMsg = new Runnable(){
-
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub
-			String myAddress = control.getMyAddress();
-			final EditText edtMessage = (EditText) findViewById(R.id.txtMessage);
-			EthernetHeader ethrHeader = new EthernetHeader(myAddress);
-			Packet p = new Packet(ethrHeader, edtMessage.getText().toString());
-			p.setMaxHop(2);
-			control.sendPacket(p);
-		}
-    	
-    };
-    
-    public void startAdhocService() {
-		Intent serviceIntent = new Intent();
-		serviceIntent.setClass(this, AdhocService.class);
-		startService(serviceIntent);
-	}
-    
-    public void stopAdhocService() {
-		Intent serviceIntent = new Intent();
-		serviceIntent.setClass(this, AdhocService.class);
-		stopService(serviceIntent);
-	}
-    
-    private Runnable checkMsg = new Runnable(){
+    private Runnable update = new Runnable(){
     	public void run(){
-    		Packet p;
-    		while(runCheck){
-    			p = control.getNextPacket();
-    			if (p != null){
-    				msg = p.getMessage() + " | " + 
-    					control.getMinHop(p.getHeader().getEathrnetHeader().getSource(), 
-    							p.getHeader().getPacketID());
-    				mHandler.post(updateText);
-    			}
-    			try {
+    		while (true){
+	    		if (control.chatUpdated()){
+	    			mHandler.post(setText);
+	    		}
+	    		try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -160,12 +149,45 @@ public class AdhocTrialActivity extends Activity {
     	}
     };
     
-    Runnable updateText = new Runnable(){
-		public void run(){
-			final EditText text = (EditText) findViewById(R.id.txtMessageBox);
-			text.setText(msg);
-			
-		}
-	};
+    private Runnable setText = new Runnable(){
+    	public void run(){
+    		final EditText txtMessages = (EditText)findViewById(R.id.txtMessageBox);
+    		txtMessages.setText(control.getChatMessages());
+    	}
+    };
+    
+    private void setView(int view){
+    	control.setView(view);
+    	if (control.getView() == AdhocControl.VIEW_MAIN)
+        	setContentView(R.layout.main);
+        else
+        	setContentView(R.layout.buddylist);
+    }
+    
+    private void refreshControls(){
+    	final EditText txtMessages = (EditText)findViewById(R.id.txtMessageBox);
+        final EditText txtSendMessage = (EditText)findViewById(R.id.txtMessage);
+        final Button btnSend = (Button)findViewById(R.id.btnSend);
+        final Button btnAdd = (Button)findViewById(R.id.btnAdd);
+        final Button btnRemove = (Button)findViewById(R.id.btnRemove);
+    	txtMessages.setEnabled(control.isStarted());
+        txtSendMessage.setEnabled(control.isStarted());
+        btnSend.setEnabled(control.isStarted());
+        btnAdd.setEnabled(control.isStarted());
+        btnRemove.setEnabled(control.isStarted());
+    }
+    
+    public void startAdhocService() {
+		Intent serviceIntent = new Intent();
+		serviceIntent.setClass(this, AdhocService.class);
+		startService(serviceIntent);
+		
+	}
+    
+    public void stopAdhocService() {
+		Intent serviceIntent = new Intent();
+		serviceIntent.setClass(this, AdhocService.class);
+		stopService(serviceIntent);
+	}
     
 }
