@@ -75,14 +75,14 @@ public class Buddylist{
 		}while (keysEnum.hasMoreElements());
 		*/
 		
-		if (valsEnum.hasMoreElements()){
-		do{
+		
+		while (valsEnum.hasMoreElements()){
 			buddy = valsEnum.nextElement();
 			timePassed = TimeKeeper.getSeconds() - buddy.getLastUpd();
 			if (timePassed > refreshRate)
 				this.remove(buddy.getAddress());			
-		}while (valsEnum.hasMoreElements());
-		}
+		};
+	
 	}
 	
 	/*
