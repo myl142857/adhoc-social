@@ -26,12 +26,20 @@ public abstract class DiscNodes {
 		public void run(){
 			Packet p;
 			int c;
+			String source;
 			while(keepRunning){
 				c = 0;
 				while(receiveList.size()>c){
 					if (receiveList.get(c).getMessageType().equals("Name")){
 						p = receiveList.remove(c);
 						//DO SOMETHING WITH THIS PACKET HERE
+						source = p.getHeader().getEathrnetHeader().getSource();
+						if (list.inList(source)){
+							list.updateBuddy(source);
+						}
+						else{
+							list.add(source, p.getMessage(), hopList.getMinPacketHops(source, p.getHeader().getPacketID()));
+						}
 					}
 					else{
 						c++;

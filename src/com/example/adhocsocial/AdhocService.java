@@ -256,6 +256,7 @@ public class AdhocService extends Service {
 		HopList.setMyAddr(mMacAddress);
 		UdpSender.setMyAddress(mMacAddress);
 		DiscNodes.setMyAddress(mMacAddress);
+		Chat.setMyAddress(mMacAddress);
 		// The hash of its MAC or IMEI is used as the IP address with 192.168.2.myHash
 		myHash3 = (short) rwgHash3(mMacAddress);
 		myHash2 = (short) rwgHash2(mMacAddress);

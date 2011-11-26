@@ -19,7 +19,7 @@ public class Buddylist{
 		//address = hashtable key
 		//Buddy = hashtable value
 		bl.put(address, buddy);		
-		//return 1 upon sucessful add
+		//return 1 upon successful add
 		return 1;
 	}
 	

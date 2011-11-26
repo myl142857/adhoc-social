@@ -35,6 +35,12 @@ public class AdhocControl {
 	public static final char IP_BYTE_2 = 168;
 	public static final char IP_BYTE_3 = 2;
 	
+	/*
+	 * 0: broadcast
+	 * 1:who is there?
+	 */
+	public static final int DISCOVERY_TYPE = 0;
+	
 	private volatile Queue<Packet> sendQueue;
 	private volatile LinkedList<Packet> receiveList;
 	
@@ -45,16 +51,13 @@ public class AdhocControl {
 	private Thread thr;
 	private HopList hopList;
 	private boolean started = false;
-	
-	private static AdhocTrialActivity main;
-	private static EditText text;
+	private String myName;
 	
 	private static Packet receivedPacket;
 	private DiscNodes discovery;
+	private Chat chat;
 	
-	public static AdhocControl startControl(AdhocTrialActivity m, EditText t){
-		main = m;
-		text = t;
+	public static AdhocControl startControl(){
 		if (control == null)
 			control = new AdhocControl();
 		return control;
@@ -65,9 +68,7 @@ public class AdhocControl {
 		sendQueue = new LinkedList<Packet>();
 		receiveList = new LinkedList<Packet>();
 		TimeKeeper.startTimer();
-		buddylist = new Buddylist();
-		hopList = new HopList();
-		
+
 		try {
         	udpS = new UdpSender(sendQueue);
         	udpR = new UdpReceiver(sendQueue, receiveList, hopList);
@@ -83,18 +84,26 @@ public class AdhocControl {
 		}
 	}
 	
-	public boolean startAdhoc(){
+	public boolean startAdhoc(String name){
 		if (started) return true;
-		main.startAdhocService();
+		myName = name;
 		udpR.startThread();
 		udpS.startThread();
 		started = true;
+		hopList = new HopList();
+		buddylist = new Buddylist();
+		if (DISCOVERY_TYPE <= 0){
+			discovery = new PushDisc(hopList,sendQueue, receiveList,myName);
+		}
+		else{
+			discovery = new PullDisc(hopList,sendQueue, receiveList,myName);
+		}
+		chat = new Chat(buddylist, sendQueue, myName);
 		return true;
 	}
 	
 	public boolean stopAdhoc(){
 		if (!started) return true;
-		main.stopAdhocService();
 		udpR.stopThread();
 		udpS.stopThread();
 		started = false;
@@ -108,36 +117,12 @@ public class AdhocControl {
 		return true;
 	}
 	
-	/*
-	public static void packetReceived(Packet p){
-		receivedPacket = p;
-		main.runOnUiThread(updateText);
-	}
-	*/
-	
-	/*
-	static Runnable updateText = new Runnable(){
-		public void run(){
-			text.setText(receivedPacket.getMessage());
-		}
-	};
-	*/
-	
 	public boolean isStarted(){
 		return started;
 	}
 	
 	public String getMyAddress(){
 		return AdhocService.getMacAddress();
-	}
-	
-	public Packet getNextPacket(){
-		if (! receiveList.isEmpty() && receiveList.peek().getMessageType().equals("Message")){
-			return receiveList.remove();
-		}
-		else{
-			return null;
-		}
 	}
 	
 	public int getMinHop(String addr, int packetID){

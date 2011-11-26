@@ -3,40 +3,81 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="303dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.21"
-        android:text="Start" />	<TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Send Message:" 
-        />		<EditText
-        android:id="@+id/editText2"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:singleLine='true' android:imeOptions="actionGo"><requestFocus />
-    </EditText>
-
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="302dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.51"
-        android:text="Send packet" />
 
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Received packet:" />
+        android:text="Name:" />
 
-    <EditText
-        android:id="@+id/editText1"
+    <LinearLayout
+        android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
-    </EditText>
+
+        <EditText
+            android:id="@+id/nameEntry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" >
+
+            <requestFocus />
+        </EditText>
+
+        <Button
+            android:id="@+id/btnStart"
+            android:layout_width="76dp"
+            android:layout_height="46dp"
+            android:text="Start" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/txtMessageBox"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.14"
+        android:inputType="textMultiLine" 
+        android:gravity="top"
+        android:scrollbars="vertical"
+        />
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <EditText
+            android:id="@+id/txtMessage"
+            android:layout_width="239dp"
+            android:layout_height="48dp" />
+
+        <Button
+            android:id="@+id/btnSend"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:text="Send" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/btnAdd"
+            android:layout_width="129dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="Add Buddy" />
+
+        <Button
+            android:id="@+id/btnRemove"
+            android:layout_width="125dp"
+            android:layout_height="49dp"
+            android:layout_weight="1"
+            android:text="Remove Buddy" />
+    </LinearLayout>
 
 </LinearLayout>
