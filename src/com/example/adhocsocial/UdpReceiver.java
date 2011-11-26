@@ -61,18 +61,18 @@ public class UdpReceiver implements Runnable {
 	private Packet msgPacket;
 	
 	private volatile Queue<Packet> sendQueue;
-	private volatile Queue<Packet> receiveQueue;
+	private volatile LinkedList<Packet> receiveList;
 	private Queue<Object[]> receivedQueue = new LinkedList<Object[]>();
 	private HopList hopList;
 	
 	private static String myAddress="";
 
-	public UdpReceiver(Queue<Packet> sendQueue, Queue<Packet> receiveQueue, HopList hopList) throws SocketException, UnknownHostException, BindException {
+	public UdpReceiver(Queue<Packet> sendQueue, LinkedList<Packet> receiveList, HopList hopList) throws SocketException, UnknownHostException, BindException {
 		int port = AdhocService.DEFAULT_PORT_BCAST;
 		mDatagramSocket = new DatagramSocket(port);
 		mDatagramSocket.setSoTimeout(0);            // Infinite timeout;
 		this.sendQueue = sendQueue;
-		this.receiveQueue = receiveQueue;
+		this.receiveList = receiveList;
 		this.hopList = hopList;
 	}
 
@@ -127,13 +127,13 @@ public class UdpReceiver implements Runnable {
 				    if (!packetReceived(msgPacket.getHeader())){
 					    if(msgPacket.getEthernetHeader().getDestination().equals("")){
 					    	//This is a broadcast message
-					    	addToReceiveQueue(msgPacket);
+					    	addToReceiveList(msgPacket);
 					    	sendQueue.add(msgPacket);
 					    }
 					    else
 					    {
 							if (msgPacket.getEthernetHeader().getDestination().equals(myAddress))
-								addToReceiveQueue(msgPacket);
+								addToReceiveList(msgPacket);
 							else{
 								sendQueue.add(msgPacket);
 							}
@@ -151,8 +151,8 @@ public class UdpReceiver implements Runnable {
 		Log.i(TAG, " Exiting the receiver loop");
 	}
 	
-	private void addToReceiveQueue(Packet p){
-		receiveQueue.add(p);
+	private void addToReceiveList(Packet p){
+		receiveList.add(p);
 		Object[] pair = new Object[2];
 		pair[0] = p.getHeader();
 		pair[1] = TimeKeeper.getSeconds();

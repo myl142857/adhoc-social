@@ -27,6 +27,7 @@ public class EthernetHeader implements Serializable {
 		this.destination = destination;
 	}
 	
+	//broadcast header
 	public EthernetHeader (String source) {
 		this.source = source;
 		this.destination = "";

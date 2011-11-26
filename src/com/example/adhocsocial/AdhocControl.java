@@ -36,7 +36,7 @@ public class AdhocControl {
 	public static final char IP_BYTE_3 = 2;
 	
 	private volatile Queue<Packet> sendQueue;
-	private volatile Queue<Packet> receiveQueue;
+	private volatile LinkedList<Packet> receiveList;
 	
 	private Buddylist buddylist;
 	
@@ -50,6 +50,7 @@ public class AdhocControl {
 	private static EditText text;
 	
 	private static Packet receivedPacket;
+	private DiscNodes discovery;
 	
 	public static AdhocControl startControl(AdhocTrialActivity m, EditText t){
 		main = m;
@@ -62,14 +63,14 @@ public class AdhocControl {
 	public AdhocControl(){
 		Logger.startLogger();
 		sendQueue = new LinkedList<Packet>();
-		receiveQueue = new LinkedList<Packet>();
+		receiveList = new LinkedList<Packet>();
 		TimeKeeper.startTimer();
 		buddylist = new Buddylist();
 		hopList = new HopList();
 		
 		try {
         	udpS = new UdpSender(sendQueue);
-        	udpR = new UdpReceiver(sendQueue, receiveQueue, hopList);
+        	udpR = new UdpReceiver(sendQueue, receiveList, hopList);
 		} catch (BindException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -101,6 +102,8 @@ public class AdhocControl {
 	}
 	
 	public boolean sendPacket(Packet p){
+		p.setMessageType("Message");
+		p.getHeader().setType(PacketHeader.TYPE_DAT);
 		sendQueue.add(p);
 		return true;
 	}
@@ -129,8 +132,8 @@ public class AdhocControl {
 	}
 	
 	public Packet getNextPacket(){
-		if (! receiveQueue.isEmpty()){
-			return receiveQueue.remove();
+		if (! receiveList.isEmpty() && receiveList.peek().getMessageType().equals("Message")){
+			return receiveList.remove();
 		}
 		else{
 			return null;
