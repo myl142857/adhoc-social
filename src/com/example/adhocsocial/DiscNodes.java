@@ -18,6 +18,7 @@ public abstract class DiscNodes {
 		this.hopList = hopList;
 		this.sendQueue = sendQueue;
 		this.myName = myName;
+		this.receiveList = receiveList;
 		keepRunning = true;
 		receiveThread = new Thread(receive);
 		receiveThread.start();

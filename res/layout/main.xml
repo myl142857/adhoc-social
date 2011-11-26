@@ -5,7 +5,7 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/lblName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Name:" />
@@ -19,11 +19,8 @@
             android:id="@+id/nameEntry"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1" >
+            android:layout_weight="1" />
 
-            <requestFocus />
-        </EditText>
-
         <Button
             android:id="@+id/btnStart"
             android:layout_width="76dp"
@@ -46,13 +43,29 @@
         android:id="@+id/linearLayout2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
-
+
+
+
+
+
+
+
+
+
         <EditText
             android:id="@+id/txtMessage"
             android:layout_width="232dp"
             android:layout_height="48dp"
             android:layout_weight="1" />
-
+
+
+
+
+
+
+
+
+
         <Button
             android:id="@+id/btnSend"
             android:layout_width="114dp"
@@ -60,7 +73,8 @@
             android:text="Send" />
 
     </LinearLayout>
-
+
+
     <LinearLayout
         android:id="@+id/linearLayout3"
         android:layout_width="fill_parent"

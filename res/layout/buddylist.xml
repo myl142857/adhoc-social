@@ -10,7 +10,13 @@
         android:layout_height="wrap_content"
         android:layout_weight="0.37" >
     </ListView>
-
+
+
+
+
+
+
+
     <Button
         android:id="@+id/btnCancel"
         android:layout_width="fill_parent"

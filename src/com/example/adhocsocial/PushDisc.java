@@ -24,8 +24,9 @@ public class PushDisc extends DiscNodes {
 	private Runnable broadcast = new Runnable(){
 		public void run(){
 			Packet p;
-			EthernetHeader eheader = new EthernetHeader(myAddress);
+			EthernetHeader eheader;
 			while(keepRunning){
+				eheader = new EthernetHeader(myAddress);
 				p = new Packet(eheader, myName);
 				p.setMessageType("Name");
 				p.setMaxHop(MAX_HOPS);

@@ -74,7 +74,8 @@ public class AdhocControl {
 		sendQueue = new LinkedList<Packet>();
 		receiveList = new LinkedList<Packet>();
 		TimeKeeper.startTimer();
-
+		hopList = new HopList();
+		
 		try {
         	udpS = new UdpSender(sendQueue);
         	udpR = new UdpReceiver(sendQueue, receiveList, hopList);
@@ -104,7 +105,6 @@ public class AdhocControl {
 		udpR.startThread();
 		udpS.startThread();
 		started = true;
-		hopList = new HopList();
 		buddylist = new Buddylist();
 		if (DISCOVERY_TYPE <= 0){
 			discovery = new PushDisc(hopList,sendQueue, receiveList,myName);
@@ -191,5 +191,14 @@ public class AdhocControl {
 	
 	public String getChatMessages(){
 		return chat.getMessages();
+	}
+	
+	public Packet getNextPacket(){
+			if (! receiveList.isEmpty() && receiveList.peek().getMessageType().equals("Message")){
+				return receiveList.remove();
+			}
+			else{
+				return null;
+			}
 	}
 }
