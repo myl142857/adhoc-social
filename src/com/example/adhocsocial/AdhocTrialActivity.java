@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.BindException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
 
 import com.example.adhoctrial.R;
 
@@ -23,6 +24,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -31,26 +34,108 @@ import android.widget.TextView;
 
 public class AdhocTrialActivity extends Activity {
 	private volatile AdhocControl control;
-	private volatile boolean runCheck = false;
-	private volatile String msg;
-	private Thread checkThread;
 	final Handler mHandler = new Handler();
+	final EditText txtName = (EditText)findViewById(R.id.nameEntry);
+	final Button startButton = (Button)findViewById(R.id.btnStart);
+    final EditText txtMessages = (EditText)findViewById(R.id.txtMessageBox);
+    final EditText txtSendMessage = (EditText)findViewById(R.id.txtMessage);
+    final Button btnSend = (Button)findViewById(R.id.btnSend);
+    final Button btnAdd = (Button)findViewById(R.id.btnAdd);
+    final Button btnRemove = (Button)findViewById(R.id.btnRemove);
+    final Button btnCancel = (Button)findViewById(R.id.btnCancel);
+    final ListView lstBuddies = (ListView)findViewById(R.id.lstBuddies);
+    private AdhocTrialActivity me;
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
         control = AdhocControl.startControl();
+        me = this;
+        if (control.getView() == AdhocControl.VIEW_MAIN)
+        	setContentView(R.layout.main);
+        else
+        	setContentView(R.layout.buddylist);
         
-        final EditText txtName = (EditText)findViewById(R.id.nameEntry);
-        final Button startButton = (Button)findViewById(R.id.btnStart);
-        final EditText txtMessages = (EditText)findViewById(R.id.txtMessageBox);
-        final EditText txtSendMessage = (EditText)findViewById(R.id.txtMessage);
-        final Button btnSend = (Button)findViewById(R.id.btnSend);
-        final Button btnAdd = (Button)findViewById(R.id.btnAdd);
-        final Button btnRemove = (Button)findViewById(R.id.btnRemove);
+        refreshControls();
         
-        txtMessages.setEnabled(control.isStarted());
+        startButton.setOnClickListener(new View.OnClickListener(){
+        	public void onClick(View v){
+        		startAdhocService();
+        		control.startAdhoc(txtName.getText().toString());
+        		refreshControls();
+        	}
+        });
+        
+        btnSend.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				control.sendMessage(txtSendMessage.getText().toString());
+			}
+		});
+        
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				LinkedList<Buddy> buddies = control.getAvailableBuddies();
+				String lv_arr[] = new String[buddies.size()];
+				for (int i = 0; i<buddies.size();i++){
+					lv_arr[i] = buddies.get(i).getName();
+				}
+				lstBuddies.setAdapter(new ArrayAdapter<String>(me, R.layout.buddylist , lv_arr));
+				setView(AdhocControl.VIEW_LIST);
+			}
+		});
+        
+        btnRemove.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				LinkedList<Buddy> buddies = control.getChatList();
+				String lv_arr[] = new String[buddies.size()];
+				for (int i = 0; i<buddies.size();i++){
+					lv_arr[i] = buddies.get(i).getName();
+				}
+				lstBuddies.setAdapter(new ArrayAdapter<String>(me, R.layout.buddylist , lv_arr));
+				setView(AdhocControl.VIEW_LIST);
+			}
+		});
+        
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				setView(AdhocControl.VIEW_MAIN);
+			}
+		});
+        
+        lstBuddies.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				// TODO Auto-generated method stub
+				control.indexSelected(arg2);
+			}
+        	
+		});
+    }
+    
+    private void setView(int view){
+    	control.setView(view);
+    	if (control.getView() == AdhocControl.VIEW_MAIN)
+        	setContentView(R.layout.main);
+        else
+        	setContentView(R.layout.buddylist);
+    }
+    
+    private void refreshControls(){
+    	txtMessages.setEnabled(control.isStarted());
         txtSendMessage.setEnabled(control.isStarted());
         btnSend.setEnabled(control.isStarted());
         btnAdd.setEnabled(control.isStarted());

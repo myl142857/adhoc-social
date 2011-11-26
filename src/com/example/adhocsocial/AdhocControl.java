@@ -21,6 +21,8 @@ import android.util.Log;
 import android.widget.EditText;
 
 public class AdhocControl {
+	public static final int VIEW_MAIN = 0;
+	public static final int VIEW_LIST = 0;
 	public static AdhocControl control;
 	/*
 	 * MASKING_BYTES
@@ -57,6 +59,10 @@ public class AdhocControl {
 	private DiscNodes discovery;
 	private Chat chat;
 	
+	private LinkedList<Buddy> lastList;
+	private int listSelected;
+	private int currentView = VIEW_MAIN;
+	
 	public static AdhocControl startControl(){
 		if (control == null)
 			control = new AdhocControl();
@@ -82,6 +88,14 @@ public class AdhocControl {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public int getView(){
+		return currentView;
+	}
+	
+	public void setView(int view){
+		currentView = view;
 	}
 	
 	public boolean startAdhoc(String name){
@@ -127,5 +141,47 @@ public class AdhocControl {
 	
 	public int getMinHop(String addr, int packetID){
 		return hopList.getMinPacketHops(addr, packetID);
+	}
+	
+	public boolean sendMessage(String message){
+		return chat.sendText(message);
+	}
+	
+	public LinkedList<Buddy> getChatList(){
+		listSelected=0;
+		lastList = chat.getChatList();
+		return lastList;
+	}
+	
+	public LinkedList<Buddy> getAvailableBuddies(){
+		listSelected=1;
+		LinkedList<Buddy> chatBuddies = control.getChatList();
+		LinkedList<Buddy> buddyList = buddylist.getList();
+		LinkedList<Buddy> availableBuddies = new LinkedList<Buddy>();
+		boolean found;
+		for (int i = 0; i<buddyList.size();i++){
+			found = false;
+			for (int j = 0; j<chatBuddies.size();j++){
+				if (chatBuddies.get(j).getAddress().equals(buddyList.get(i).getAddress()))
+					found = true;
+			}
+			if (found == false){
+				availableBuddies.add(buddyList.get(i));
+			}
+		}
+		lastList = availableBuddies;
+		return availableBuddies;
+	}
+	
+	public void indexSelected(int index){
+		Buddy b = lastList.get(index);
+		if (listSelected == 0){
+			//remove from chat
+			chat.removeBuddyFromChat(b);
+		}
+		else{
+			//add to chat
+			chat.addBuddyToChat(b);
+		}
 	}
 }

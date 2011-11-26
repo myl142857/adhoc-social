@@ -46,15 +46,16 @@
         android:id="@+id/linearLayout2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
-
+
         <EditText
             android:id="@+id/txtMessage"
-            android:layout_width="239dp"
-            android:layout_height="48dp" />
-
+            android:layout_width="232dp"
+            android:layout_height="48dp"
+            android:layout_weight="1" />
+
         <Button
             android:id="@+id/btnSend"
-            android:layout_width="fill_parent"
+            android:layout_width="114dp"
             android:layout_height="50dp"
             android:text="Send" />
 

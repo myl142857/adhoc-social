@@ -1,18 +1,42 @@
 package com.example.adhocsocial;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.LinkedList;
 
 public class Buddylist{
 //attributes
+	private static final int UPDATE_INTERVAL_MS = 100;
+	private static final double STALE_BUDDY_S = 120;
 	Hashtable<String, Buddy> bl;
+	Thread clearThread;
+	boolean keepRunning = false;
+	Runnable update = new Runnable(){
+		public void run(){
+			while(keepRunning){
+				updateList(STALE_BUDDY_S);
+				try {
+					Thread.sleep(UPDATE_INTERVAL_MS);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	};
 	
 	
 //constructors
 	public Buddylist(){
 		bl = new Hashtable<String, Buddy>();
+		keepRunning = true;
+		clearThread = new Thread(update);
+		clearThread.start();
 	}
 	
 //methods
+	protected void finalize(){
+		keepRunning = false;
+	}
 	public int add(String address, String name, int hops){
 		//take address and instantiate a Buddy
 		Buddy buddy = new Buddy(address, name, hops);
@@ -28,8 +52,19 @@ public class Buddylist{
 		return temp;
 	}
 	
-	public Hashtable<String, Buddy> getList (){
+	/*public Hashtable<String, Buddy> getList (){
 		return bl;
+	}*/
+	
+	public LinkedList<Buddy> getList(){
+		LinkedList<Buddy> list = new LinkedList<Buddy>();
+		Buddy buddy;
+		Enumeration <Buddy>  valsEnum = bl.elements();	
+		while (valsEnum.hasMoreElements()){
+			buddy = valsEnum.nextElement();
+			list.add(buddy);		
+		}
+		return list;
 	}
 	
 	public boolean inList (String address){
@@ -81,7 +116,7 @@ public class Buddylist{
 			timePassed = TimeKeeper.getSeconds() - buddy.getLastUpd();
 			if (timePassed > refreshRate)
 				this.remove(buddy.getAddress());			
-		};
+		}
 	
 	}
 	

@@ -12,6 +12,7 @@ public class Chat {
 	private LinkedList<String> messages = new LinkedList<String>();
 	protected volatile Queue<Packet> sendQueue;
 	private String myName;
+	private boolean updated = false;
 	
 	public Chat(Buddylist list, Queue<Packet> sendQueue, String myName){
 		this.list = list;
@@ -26,6 +27,16 @@ public class Chat {
 			chatBuddies.add(b);
 		}
 		return true;
+	}
+	
+	public boolean removeBuddyFromChat(Buddy b){
+		for (int i=0;i<chatBuddies.size();i++){
+			if (chatBuddies.get(i).getAddress().equals(b.getAddress())){
+				chatBuddies.remove(i);
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public static void setMyAddress(String addr){
@@ -73,6 +84,7 @@ public class Chat {
 		if (messages.size() > MAX_MESSAGES)
 			messages.remove();
 		messages.add(s);
+		updated = true;
 	}
 	
 	public String getMessages(){
@@ -85,5 +97,13 @@ public class Chat {
 				s+="\r\n";
 		}
 		return s;
+	}
+	
+	public boolean isUpdated(){
+		return updated;
+	}
+	
+	public LinkedList<Buddy> getChatList(){
+		return chatBuddies;
 	}
 }
