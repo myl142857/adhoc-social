@@ -3,6 +3,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
+import android.util.Log;
+
 public class Buddylist{
 //attributes
 	private static final int UPDATE_INTERVAL_MS = 100;
@@ -114,8 +116,10 @@ public class Buddylist{
 		while (valsEnum.hasMoreElements()){
 			buddy = valsEnum.nextElement();
 			timePassed = TimeKeeper.getSeconds() - buddy.getLastUpd();
-			if (timePassed > refreshRate)
-				this.remove(buddy.getAddress());			
+			if (timePassed > refreshRate){
+				this.remove(buddy.getAddress());
+				Log.i("Buddylist","Removed stale buddy");
+			}
 		}
 	
 	}

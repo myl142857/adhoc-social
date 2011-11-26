@@ -51,6 +51,7 @@ public class AdhocControl {
 	private UdpReceiver udpR;
 	private UdpSender udpS;
 	private Thread thr;
+	private Thread startThread;
 	private HopList hopList;
 	private boolean started = false;
 	private String myName;
@@ -62,6 +63,8 @@ public class AdhocControl {
 	private LinkedList<Buddy> lastList;
 	private int listSelected;
 	private int currentView = VIEW_MAIN;
+	
+	private boolean refreshMe = false;
 	
 	public static AdhocControl startControl(){
 		if (control == null)
@@ -99,20 +102,39 @@ public class AdhocControl {
 		currentView = view;
 	}
 	
+	private Runnable startMeUp = new Runnable(){
+		public void run(){
+			int timeout = 10000;
+			int currentTime = 0;
+			while(!AdhocService.isStarted() && currentTime<timeout){
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				currentTime+=10;
+			}
+			udpR.startThread();
+			udpS.startThread();
+			buddylist = new Buddylist();
+			if (DISCOVERY_TYPE <= 0){
+				discovery = new PushDisc(hopList,sendQueue, receiveList,myName);
+			}
+			else{
+				discovery = new PullDisc(hopList,sendQueue, receiveList,myName);
+			}
+			chat = new Chat(buddylist, sendQueue, myName);
+			started = true;
+			refreshMe = true;
+		}
+	};
+	
 	public boolean startAdhoc(String name){
 		if (started) return true;
 		myName = name;
-		udpR.startThread();
-		udpS.startThread();
-		started = true;
-		buddylist = new Buddylist();
-		if (DISCOVERY_TYPE <= 0){
-			discovery = new PushDisc(hopList,sendQueue, receiveList,myName);
-		}
-		else{
-			discovery = new PullDisc(hopList,sendQueue, receiveList,myName);
-		}
-		chat = new Chat(buddylist, sendQueue, myName);
+		startThread = new Thread(startMeUp);
+		startThread.start();
 		return true;
 	}
 	
@@ -186,6 +208,8 @@ public class AdhocControl {
 	}
 	
 	public boolean chatUpdated(){
+		if (chat == null)
+			return false;
 		return chat.isUpdated();
 	}
 	
@@ -200,5 +224,14 @@ public class AdhocControl {
 			else{
 				return null;
 			}
+	}
+	
+	public boolean canRefresh(){
+		if (refreshMe){
+			refreshMe = false;
+			return true;
+		}
+		else
+			return false;
 	}
 }

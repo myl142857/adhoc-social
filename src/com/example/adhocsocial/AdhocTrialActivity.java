@@ -61,13 +61,13 @@ public class AdhocTrialActivity extends Activity {
         final Button btnCancel = (Button)findViewById(R.id.btnCancel);
         final ListView lstBuddies = (ListView)findViewById(R.id.lstBuddies);
         
-        refreshControls();
+        refreshControls.run();
         
         startButton.setOnClickListener(new View.OnClickListener(){
         	public void onClick(View v){
         		startAdhocService();
         		control.startAdhoc(txtName.getText().toString());
-        		refreshControls();
+        		refreshControls.run();
         		textUpdate = new Thread(update);
         		textUpdate.start();
         	}
@@ -136,6 +136,8 @@ public class AdhocTrialActivity extends Activity {
     private Runnable update = new Runnable(){
     	public void run(){
     		while (true){
+    			if (control.canRefresh())
+    				mHandler.post(refreshControls);
 	    		if (control.chatUpdated()){
 	    			mHandler.post(setText);
 	    		}
@@ -151,8 +153,10 @@ public class AdhocTrialActivity extends Activity {
     
     private Runnable setText = new Runnable(){
     	public void run(){
-    		final EditText txtMessages = (EditText)findViewById(R.id.txtMessageBox);
-    		txtMessages.setText(control.getChatMessages());
+    		if (control.isStarted()){
+	    		final EditText txtMessages = (EditText)findViewById(R.id.txtMessageBox);
+	    		txtMessages.setText(control.getChatMessages());
+    		}
     	}
     };
     
@@ -164,24 +168,31 @@ public class AdhocTrialActivity extends Activity {
         	setContentView(R.layout.buddylist);
     }
     
-    private void refreshControls(){
-    	final EditText txtMessages = (EditText)findViewById(R.id.txtMessageBox);
-        final EditText txtSendMessage = (EditText)findViewById(R.id.txtMessage);
-        final Button btnSend = (Button)findViewById(R.id.btnSend);
-        final Button btnAdd = (Button)findViewById(R.id.btnAdd);
-        final Button btnRemove = (Button)findViewById(R.id.btnRemove);
-    	txtMessages.setEnabled(control.isStarted());
-        txtSendMessage.setEnabled(control.isStarted());
-        btnSend.setEnabled(control.isStarted());
-        btnAdd.setEnabled(control.isStarted());
-        btnRemove.setEnabled(control.isStarted());
-    }
+    private Runnable refreshControls = new Runnable(){
+    	public void run(){
+    		final EditText txtName = (EditText)findViewById(R.id.nameEntry);
+        	final Button startButton = (Button)findViewById(R.id.btnStart);
+    		final EditText txtMessages = (EditText)findViewById(R.id.txtMessageBox);
+            final EditText txtSendMessage = (EditText)findViewById(R.id.txtMessage);
+            final Button btnSend = (Button)findViewById(R.id.btnSend);
+            final Button btnAdd = (Button)findViewById(R.id.btnAdd);
+            final Button btnRemove = (Button)findViewById(R.id.btnRemove);
+            txtName.setEnabled(!control.isStarted());
+            startButton.setEnabled(!control.isStarted());
+        	txtMessages.setEnabled(control.isStarted());
+            txtSendMessage.setEnabled(control.isStarted());
+            btnSend.setEnabled(control.isStarted());
+            btnAdd.setEnabled(control.isStarted());
+            btnRemove.setEnabled(control.isStarted());
+    	}
+    };
     
     public void startAdhocService() {
-		Intent serviceIntent = new Intent();
-		serviceIntent.setClass(this, AdhocService.class);
-		startService(serviceIntent);
-		
+    	if (!AdhocService.isStarted()){
+			Intent serviceIntent = new Intent();
+			serviceIntent.setClass(this, AdhocService.class);
+			startService(serviceIntent);
+    	}
 	}
     
     public void stopAdhocService() {

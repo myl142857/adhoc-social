@@ -35,7 +35,6 @@ public class Packet implements Serializable {
 		header = new PacketHeader();
 		this.header.setEthrHeader(ethrHeader);
 		message = data;
-		message = "";
 		messageType = "";
 	}
 

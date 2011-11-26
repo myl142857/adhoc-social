@@ -43,8 +43,8 @@ public class EthernetHeader implements Serializable {
 	}
 
 
-	public void setSource(String source) {
-		this.source = source;
+	public void setSource(String s) {
+		this.source = s;
 	}
 	
 	public void setSentFrom(String addr){
@@ -66,7 +66,7 @@ public class EthernetHeader implements Serializable {
 
 	public String toString() {
 		return "  Source: " + source + "\r\n  Destination: " + destination + "\r\n" +
-				"  Sent From: " + sentFrom;
+				"  Sent From: " + sentFrom + "\r\n";
 	}
 	
 	public String toXlsString(){

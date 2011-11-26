@@ -102,7 +102,8 @@ public class AdhocService extends Service {
 	
 	private int mGroupSize;
 	private String mSSID;
-
+	
+	private static boolean started;
 
 	@Override
 	public void onCreate() {
@@ -354,7 +355,7 @@ public class AdhocService extends Service {
 		Log.i(TAG, "Starting Wifi");
 		ok = mCoretask.runRootCommand("ifconfig tiwlan0 up");
 		Log.i(TAG, "Started Wifi ... ok = " + ok);
-
+		started = true;
 		return ok;  
 	}
 
@@ -417,5 +418,7 @@ public class AdhocService extends Service {
 		return adhocInstance  != null;
 	}
 
-
+	public static boolean isStarted(){
+		return started;
+	}
 }
