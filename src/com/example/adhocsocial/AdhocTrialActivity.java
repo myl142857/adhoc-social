@@ -14,7 +14,10 @@ import java.util.LinkedList;
 import com.example.adhoctrial.R;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.wifi.WifiManager;
@@ -30,6 +33,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.PopupWindow;
+import android.widget.Toast;
+
 
 
 public class AdhocTrialActivity extends Activity {
@@ -86,14 +92,17 @@ public class AdhocTrialActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
+				// TODO Auto-generated method stub		
 				LinkedList<Buddy> buddies = control.getAvailableBuddies();
-				String lv_arr[] = new String[buddies.size()];
+				final String[] items = new String[buddies.size()];
 				for (int i = 0; i<buddies.size();i++){
-					lv_arr[i] = buddies.get(i).getName();
+					items[i] = buddies.get(i).getName();
 				}
-				lstBuddies.setAdapter(new ArrayAdapter<String>(me, R.layout.buddylist , lv_arr));
-				setView(AdhocControl.VIEW_LIST);
+				AlertDialog.Builder builder = new AlertDialog.Builder(me);
+				builder.setTitle("Pick a buddy");
+				builder.setItems(items,dlgListen);
+				AlertDialog alert = builder.create();
+				builder.show();
 			}
 		});
         
@@ -103,12 +112,15 @@ public class AdhocTrialActivity extends Activity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				LinkedList<Buddy> buddies = control.getChatList();
-				String lv_arr[] = new String[buddies.size()];
+				String items[] = new String[buddies.size()];
 				for (int i = 0; i<buddies.size();i++){
-					lv_arr[i] = buddies.get(i).getName();
+					items[i] = buddies.get(i).getName();
 				}
-				lstBuddies.setAdapter(new ArrayAdapter<String>(me, R.layout.buddylist , lv_arr));
-				setView(AdhocControl.VIEW_LIST);
+				AlertDialog.Builder builder = new AlertDialog.Builder(me);
+				builder.setTitle("Pick a buddy");
+				builder.setItems(items,dlgListen);
+				AlertDialog alert = builder.create();
+				builder.show();
 			}
 		});
         
@@ -132,6 +144,15 @@ public class AdhocTrialActivity extends Activity {
         	
 		});*/
     }
+    
+    private OnClickListener dlgListen = new DialogInterface.OnClickListener() {
+		
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			// TODO Auto-generated method stub
+			control.indexSelected(which);
+		}
+	};
     
     private Runnable update = new Runnable(){
     	public void run(){
