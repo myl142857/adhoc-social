@@ -13,8 +13,8 @@ public abstract class DiscNodes {
 	protected String myName;
 	private Thread receiveThread;
 	private boolean keepRunning = false;
-	public DiscNodes(HopList hopList, Queue<Packet> sendQueue, LinkedList<Packet> receiveList, String myName){
-		list = new Buddylist();
+	public DiscNodes(HopList hopList, Queue<Packet> sendQueue, LinkedList<Packet> receiveList, Buddylist list, String myName){
+		this.list = list;
 		this.hopList = hopList;
 		this.sendQueue = sendQueue;
 		this.myName = myName;

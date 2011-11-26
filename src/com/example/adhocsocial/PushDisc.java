@@ -10,8 +10,8 @@ public class PushDisc extends DiscNodes {
 	private boolean keepRunning = false;
 	private Thread broadcastThread;
 	
-	public PushDisc(HopList hopList, Queue<Packet> sendQueue, LinkedList<Packet> receiveList, String myName){
-		super(hopList, sendQueue, receiveList, myName);
+	public PushDisc(HopList hopList, Queue<Packet> sendQueue, LinkedList<Packet> receiveList, Buddylist list, String myName){
+		super(hopList, sendQueue, receiveList, list, myName);
 		keepRunning = true;
 		broadcastThread = new Thread(broadcast);
 		broadcastThread.start();

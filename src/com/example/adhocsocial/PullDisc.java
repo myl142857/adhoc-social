@@ -9,8 +9,8 @@ public class PullDisc extends DiscNodes {
 	protected static final int PULL_MS = 30000;
 	private boolean keepRunning = false;
 	private Thread pullThread;
-	public PullDisc(HopList hopList, Queue<Packet> sendQueue, LinkedList<Packet> receiveList, String myName){
-		super(hopList, sendQueue, receiveList, myName);
+	public PullDisc(HopList hopList, Queue<Packet> sendQueue, LinkedList<Packet> receiveList, Buddylist list, String myName){
+		super(hopList, sendQueue, receiveList,list, myName);
 		keepRunning = true;
 		pullThread = new Thread(pullDat);
 		pullThread.start();

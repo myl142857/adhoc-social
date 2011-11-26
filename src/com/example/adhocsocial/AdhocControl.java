@@ -119,10 +119,10 @@ public class AdhocControl {
 			udpS.startThread();
 			buddylist = new Buddylist();
 			if (DISCOVERY_TYPE <= 0){
-				discovery = new PushDisc(hopList,sendQueue, receiveList,myName);
+				discovery = new PushDisc(hopList,sendQueue, receiveList,buddylist,myName);
 			}
 			else{
-				discovery = new PullDisc(hopList,sendQueue, receiveList,myName);
+				discovery = new PullDisc(hopList,sendQueue, receiveList,buddylist,myName);
 			}
 			chat = new Chat(buddylist, sendQueue, myName);
 			started = true;
