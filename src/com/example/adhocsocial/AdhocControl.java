@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.BindException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -44,13 +45,12 @@ public class AdhocControl {
 	public static final int DISCOVERY_TYPE = 0;
 	
 	private volatile Queue<Packet> sendQueue;
-	private volatile LinkedList<Packet> receiveList;
+	private volatile HashMap<String,Queue<Packet>> receiveQueue;
 	
 	private Buddylist buddylist;
 	
 	private UdpReceiver udpR;
 	private UdpSender udpS;
-	private Thread thr;
 	private Thread startThread;
 	private HopList hopList;
 	private boolean started = false;
@@ -75,13 +75,13 @@ public class AdhocControl {
 	public AdhocControl(){
 		Logger.startLogger();
 		sendQueue = new LinkedList<Packet>();
-		receiveList = new LinkedList<Packet>();
+		receiveQueue = new HashMap<String, Queue<Packet>>();
 		TimeKeeper.startTimer();
 		hopList = new HopList();
 		
 		try {
         	udpS = new UdpSender(sendQueue);
-        	udpR = new UdpReceiver(sendQueue, receiveList, hopList);
+        	udpR = new UdpReceiver(sendQueue, receiveQueue, hopList);
 		} catch (BindException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -119,10 +119,10 @@ public class AdhocControl {
 			udpS.startThread();
 			buddylist = new Buddylist();
 			if (DISCOVERY_TYPE <= 0){
-				discovery = new PushDisc(hopList,sendQueue, receiveList,buddylist,myName);
+				discovery = new PushDisc(hopList,sendQueue, receiveQueue,buddylist,myName);
 			}
 			else{
-				discovery = new PullDisc(hopList,sendQueue, receiveList,buddylist,myName);
+				discovery = new PullDisc(hopList,sendQueue, receiveQueue,buddylist,myName);
 			}
 			chat = new Chat(buddylist, sendQueue, myName);
 			started = true;
@@ -170,16 +170,16 @@ public class AdhocControl {
 	}
 	
 	public LinkedList<Buddy> getChatList(){
-		listSelected=0;
 		lastList = chat.getChatList();
+		listSelected=0;
 		return lastList;
 	}
 	
 	public LinkedList<Buddy> getAvailableBuddies(){
-		listSelected=1;
 		LinkedList<Buddy> chatBuddies = control.getChatList();
 		LinkedList<Buddy> buddyList = buddylist.getList();
 		LinkedList<Buddy> availableBuddies = new LinkedList<Buddy>();
+		listSelected=1;
 		boolean found;
 		for (int i = 0; i<buddyList.size();i++){
 			found = false;
@@ -215,15 +215,6 @@ public class AdhocControl {
 	
 	public String getChatMessages(){
 		return chat.getMessages();
-	}
-	
-	public Packet getNextPacket(){
-			if (! receiveList.isEmpty() && receiveList.peek().getMessageType().equals("Message")){
-				return receiveList.remove();
-			}
-			else{
-				return null;
-			}
 	}
 	
 	public boolean canRefresh(){

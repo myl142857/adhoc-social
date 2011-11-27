@@ -1,17 +1,18 @@
 package com.example.adhocsocial;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
 //PushDisc will broadcast my position on intervals
 public class PushDisc extends DiscNodes {
 	protected static final int MAX_HOPS = 5;
-	protected static final int BROADCAST_MS = 30000;
+	protected static final int BROADCAST_MS = 5000;
 	private boolean keepRunning = false;
 	private Thread broadcastThread;
 	
-	public PushDisc(HopList hopList, Queue<Packet> sendQueue, LinkedList<Packet> receiveList, Buddylist list, String myName){
-		super(hopList, sendQueue, receiveList, list, myName);
+	public PushDisc(HopList hopList, Queue<Packet> sendQueue, HashMap<String,Queue<Packet>> receiveQueue, Buddylist list, String myName){
+		super(hopList, sendQueue, receiveQueue, list, myName);
 		keepRunning = true;
 		broadcastThread = new Thread(broadcast);
 		broadcastThread.start();

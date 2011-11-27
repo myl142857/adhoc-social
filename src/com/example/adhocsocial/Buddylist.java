@@ -30,9 +30,10 @@ public class Buddylist{
 //constructors
 	public Buddylist(){
 		bl = new Hashtable<String, Buddy>();
-		keepRunning = true;
+		//For now, dont run the cleanup thread
+		/*keepRunning = true;
 		clearThread = new Thread(update);
-		clearThread.start();
+		clearThread.start();*/
 	}
 	
 //methods

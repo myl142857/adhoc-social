@@ -66,6 +66,10 @@ public class Chat {
 		return true;
 	}
 	
+	/*private Runnable receiveText = new Runnable(){
+		
+	}*/
+	
 	public void checkBuddiesAlive(){
 		if (chatBuddies.size()<=0) return;
 		int c=0;

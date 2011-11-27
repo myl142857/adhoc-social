@@ -32,6 +32,7 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -61,18 +62,19 @@ public class UdpReceiver implements Runnable {
 	private Packet msgPacket;
 	
 	private volatile Queue<Packet> sendQueue;
-	private volatile LinkedList<Packet> receiveList;
+	//based on message type
+	private volatile HashMap<String,Queue<Packet>> receiveQueue;
 	private Queue<Object[]> receivedQueue = new LinkedList<Object[]>();
 	private HopList hopList;
 	
 	private static String myAddress="";
 
-	public UdpReceiver(Queue<Packet> sendQueue, LinkedList<Packet> receiveList, HopList hopList) throws SocketException, UnknownHostException, BindException {
+	public UdpReceiver(Queue<Packet> sendQueue, HashMap<String,Queue<Packet>> receiveQueue, HopList hopList) throws SocketException, UnknownHostException, BindException {
 		int port = AdhocService.DEFAULT_PORT_BCAST;
 		mDatagramSocket = new DatagramSocket(port);
 		mDatagramSocket.setSoTimeout(0);            // Infinite timeout;
 		this.sendQueue = sendQueue;
-		this.receiveList = receiveList;
+		this.receiveQueue = receiveQueue;
 		this.hopList = hopList;
 	}
 
@@ -152,7 +154,13 @@ public class UdpReceiver implements Runnable {
 	}
 	
 	private void addToReceiveList(Packet p){
-		receiveList.add(p);
+		String type=p.getMessageType();
+		if (type.equals(""))
+			type="null";
+		if (!receiveQueue.containsKey(type)){
+			receiveQueue.put(type, new LinkedList<Packet>());
+		}
+		receiveQueue.get(type).add(p);
 		Object[] pair = new Object[2];
 		pair[0] = p.getHeader();
 		pair[1] = TimeKeeper.getSeconds();
