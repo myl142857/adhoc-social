@@ -124,7 +124,7 @@ public class AdhocControl {
 			else{
 				discovery = new PullDisc(hopList,sendQueue, receiveQueue,buddylist,myName);
 			}
-			chat = new Chat(buddylist, sendQueue, myName);
+			chat = new Chat(buddylist, sendQueue, receiveQueue, myName);
 			started = true;
 			refreshMe = true;
 		}

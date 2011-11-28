@@ -35,7 +35,7 @@ public class PullDisc extends DiscNodes {
 				sendPacket(p);
 				
 				c = 0;
-				while(receiveQueue.containsKey("Name") && !receiveQueue.get("Pull").isEmpty()){
+				while(receiveQueue.containsKey("Pull") && !receiveQueue.get("Pull").isEmpty()){
 					p = receiveQueue.get("Pull").remove();
 					//DO SOMETHING WITH THIS PACKET HERE
 					ackHeader = new EthernetHeader(myAddress,p.getEthernetHeader().getSource());

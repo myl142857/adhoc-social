@@ -1,24 +1,38 @@
 package com.example.adhocsocial;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class Chat {
 	protected static final int MAX_MESSAGE_HOPS = 6;
 	protected static final int MAX_MESSAGES = 5;
+	protected static final int MESSAGE_CHECK_MS = 10;
 	private static String myAddress;
 	private Buddylist list;
 	private LinkedList<Buddy> chatBuddies;
 	private LinkedList<String> messages = new LinkedList<String>();
 	protected volatile Queue<Packet> sendQueue;
+	protected volatile HashMap<String,Queue<Packet>> receiveQueue;
 	private String myName;
 	private boolean updated = false;
+	private Thread chatThread;
+	private boolean keepRunning;
 	
-	public Chat(Buddylist list, Queue<Packet> sendQueue, String myName){
+	public Chat(Buddylist list, Queue<Packet> sendQueue, HashMap<String,Queue<Packet>> receiveQueue, String myName){
 		this.list = list;
 		this.sendQueue = sendQueue;
 		this.myName = myName;
+		this.receiveQueue = receiveQueue;
 		chatBuddies = new LinkedList<Buddy>();
+		
+		keepRunning = true;
+		chatThread = new Thread(messageCheck);
+		chatThread.start();
+	}
+	
+	protected void finalize(){
+		keepRunning = false;
 	}
 	
 	//need to add buddies to list
@@ -110,4 +124,29 @@ public class Chat {
 	public LinkedList<Buddy> getChatList(){
 		return chatBuddies;
 	}
+	
+	private Runnable messageCheck = new Runnable(){
+		public void run(){
+			Packet p;
+			String name;
+			Buddy b;
+			while (keepRunning){
+				while (receiveQueue.containsKey("Message") && !receiveQueue.get("Message").isEmpty()){
+					p = receiveQueue.get("Message").remove();
+					b = list.getBuddy(p.getEthernetHeader().getSource());
+					if (b==null)
+						name = "null";
+					else
+						name = b.getName();
+					addMessage(name+": "+p.getMessage());
+				}
+				try {
+					Thread.sleep(MESSAGE_CHECK_MS);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	};
 }
