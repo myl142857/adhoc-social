@@ -6,7 +6,6 @@ import java.util.Queue;
 
 //PushDisc will broadcast my position on intervals
 public class PushDisc extends DiscNodes {
-	protected static final int MAX_HOPS = 5;
 	protected static final int BROADCAST_MS = 5000;
 	private boolean keepRunning = false;
 	private Thread broadcastThread;

@@ -47,10 +47,10 @@ public class Logger {
         			  "\r\n-------------------------------------\r\n\r\n");
 		 
         writeXlsLine("\r\n\r\nTime\tReceive Size\tSent From\tSource\tDestination\tPacket ID"+
-				"\tMax Hop\tCurrent Time\tMax Time\tType\tApplication\t"+
+				"\tMax Hop\tCurrent Hop\tMax Time\tType\tApplication\t"+
 				"Message Type\tMessage"+
 				"\t\tSent Size\tSent From\tSource\tDestination\tPacket ID"+
-				"\tMax Hop\tCurrent Time\tMax Time\tType\tApplication\t"+
+				"\tMax Hop\tCurrent Hop\tMax Time\tType\tApplication\t"+
 				"Message Type\tMessage\r\n");
 		
         Log.i(TAG, "Logger started");

@@ -40,9 +40,9 @@ public class AdhocControl {
 	
 	/*
 	 * 0: broadcast
-	 * 1:who is there?
+	 * 1: who is there?
 	 */
-	public static final int DISCOVERY_TYPE = 0;
+	public static final int DISCOVERY_TYPE = 1;
 	
 	private volatile Queue<Packet> sendQueue;
 	private volatile HashMap<String,Queue<Packet>> receiveQueue;
@@ -94,6 +94,20 @@ public class AdhocControl {
 		}
 	}
 	
+	public void refreshBuddyList(){
+		if (DISCOVERY_TYPE == 1 && PullDisc.PULL_MS <= 0){
+			PullDisc pull = (PullDisc) discovery;
+			pull.getBuddies();
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			pull.loadBuddies();
+		}
+	}
+	
 	public int getView(){
 		return currentView;
 	}
@@ -117,7 +131,7 @@ public class AdhocControl {
 			}
 			udpR.startThread();
 			udpS.startThread();
-			buddylist = new Buddylist();
+			buddylist = new Buddylist(sendQueue);
 			if (DISCOVERY_TYPE <= 0){
 				discovery = new PushDisc(hopList,sendQueue, receiveQueue,buddylist,myName);
 			}

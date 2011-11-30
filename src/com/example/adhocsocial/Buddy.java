@@ -5,6 +5,7 @@ public class Buddy{
 	String name;
 	int minHops;
 	double lastTimeUpdated;
+	double lastPinged;
 	//constructors
 	public Buddy(){
 		address = "";
@@ -51,5 +52,13 @@ public class Buddy{
 	
 	public void update(){
 		lastTimeUpdated = TimeKeeper.getSeconds();
+	}
+	
+	public void setLastPinged(double t){
+		lastPinged = t;
+	}
+	
+	public double getLastPinged(){
+		return lastPinged;
 	}
 }

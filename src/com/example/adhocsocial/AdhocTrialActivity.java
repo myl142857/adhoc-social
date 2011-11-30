@@ -85,6 +85,7 @@ public class AdhocTrialActivity extends Activity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				control.sendMessage(txtSendMessage.getText().toString());
+				txtSendMessage.setText("");
 			}
 		});
         
@@ -92,7 +93,8 @@ public class AdhocTrialActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub		
+				// TODO Auto-generated method stub
+				control.refreshBuddyList();
 				LinkedList<Buddy> buddies = control.getAvailableBuddies();
 				final String[] items = new String[buddies.size()];
 				for (int i = 0; i<buddies.size();i++){
@@ -143,6 +145,20 @@ public class AdhocTrialActivity extends Activity {
 			}
         	
 		});*/
+        txtSendMessage.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+			
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				// TODO Auto-generated method stub
+				if (event == null || event.getAction() == 0){
+					if (!control.isStarted()) return true;
+					control.sendMessage(txtSendMessage.getText().toString());
+					txtSendMessage.setText("");
+					return true;
+				}
+				return true;
+			}
+		});
     }
     
     private OnClickListener dlgListen = new DialogInterface.OnClickListener() {

@@ -6,7 +6,7 @@ import java.util.Queue;
 
 public class Chat {
 	protected static final int MAX_MESSAGE_HOPS = 6;
-	protected static final int MAX_MESSAGES = 5;
+	protected static final int MAX_MESSAGES = 4;
 	protected static final int MESSAGE_CHECK_MS = 10;
 	private static String myAddress;
 	private Buddylist list;
@@ -99,7 +99,7 @@ public class Chat {
 	}
 	
 	private void addMessage(String s){
-		if (messages.size() > MAX_MESSAGES)
+		if (messages.size() > (MAX_MESSAGES-1))
 			messages.remove();
 		messages.add(s);
 		updated = true;
@@ -112,7 +112,7 @@ public class Chat {
 		for (int i = 0; i<messages.size();i++){
 			s+=messages.get(i);
 			if (i != messages.size()-1)
-				s+="\r\n";
+				s+="\n";
 		}
 		return s;
 	}

@@ -56,7 +56,8 @@
             android:id="@+id/txtMessage"
             android:layout_width="232dp"
             android:layout_height="48dp"
-            android:layout_weight="1" />
+            android:layout_weight="1" 
+            android:singleLine='true' android:imeOptions="actionGo"/>
 
 
 

@@ -2,6 +2,7 @@ package com.example.adhocsocial;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.Queue;
 
 import android.util.Log;
 
@@ -9,6 +10,8 @@ public class Buddylist{
 //attributes
 	private static final int UPDATE_INTERVAL_MS = 100;
 	private static final double STALE_BUDDY_S = 120;
+	private volatile Queue<Packet> sendQueue;
+	private static String myAddress;
 	Hashtable<String, Buddy> bl;
 	Thread clearThread;
 	boolean keepRunning = false;
@@ -28,12 +31,12 @@ public class Buddylist{
 	
 	
 //constructors
-	public Buddylist(){
+	public Buddylist(Queue<Packet> sendQueue){
 		bl = new Hashtable<String, Buddy>();
-		//For now, dont run the cleanup thread
-		/*keepRunning = true;
+		this.sendQueue = sendQueue;
+		keepRunning = true;
 		clearThread = new Thread(update);
-		clearThread.start();*/
+		clearThread.start();
 	}
 	
 //methods
@@ -92,6 +95,17 @@ public class Buddylist{
 		b.update();
 	}
 	
+	public void updateBuddy (String address, String name){
+		Buddy b = bl.get(address);
+		b.setName(name);
+		b.update();
+	}
+	
+	public boolean nameChanged(String address, String name){
+		Buddy b = bl.get(address);
+		return (!name.equals(b.getName()));
+	}
+	
 	public void updateList(double refreshRate){
 		
 		String address;
@@ -121,34 +135,38 @@ public class Buddylist{
 				this.remove(buddy.getAddress());
 				Log.i("Buddylist","Removed stale buddy");
 			}
+			else if (timePassed > (refreshRate/2.0) && 
+					buddy.getLastPinged() + 10.0 < TimeKeeper.getSeconds()){
+				//ping every 10 seconds for the last half of the timeout
+				ping(buddy.getAddress());
+				Log.i("Buddylist","pinged buddy");
+			}
 		}
 	
 	}
 	
-	/*
-	public static boolean Pong(PingPacket P){
-		
-	}
-	
-	
-	public static boolean Ping (String address, double time){
-		double t = TimeKeeper.getSeconds();
-		boolean ACKRecd = false;
+	public int ping (String address){
+		if (!inList(address)) return -1;
+		getBuddy(address).setLastPinged(TimeKeeper.getSeconds());
 		//make pingPacket
+		EthernetHeader header = new EthernetHeader(myAddress,address);
+		Packet pingPacket = new Packet(header,"");
+		pingPacket.getHeader().setType(PacketHeader.TYPE_PING);
+		pingPacket.setMessageType("ping");
+		pingPacket.setMaxHop(DiscNodes.MAX_HOPS);
 		
 		//give pingPacket to UDPSender
+		sendPacket(pingPacket);
 		
-		try{
-		while(TimeKeeper.getSeconds()-t < time){
-			Thread.sleep(10);
-			if (ACKRecd)
-				return true;
-		}
-			return false;
-		}
-		catch(Exception e){return false;}
-		
+		return pingPacket.getPacketID();
 	}
-	*/
-
+	
+	protected boolean sendPacket(Packet p){
+		sendQueue.add(p);
+		return true;
+	}
+	
+	public static void setMyAddress(String addr){
+		myAddress = addr;
+	}
 }

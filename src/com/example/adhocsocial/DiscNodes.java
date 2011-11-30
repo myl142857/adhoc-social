@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import android.util.Log;
+
 public abstract class DiscNodes {
+	public static final int MAX_HOPS = 5;
 	protected static final int RECEIVE_CHECK_TIME = 100;
 	protected static String myAddress="";
 	protected Buddylist list;
@@ -25,23 +28,9 @@ public abstract class DiscNodes {
 		receiveThread.start();
 	}
 	private Runnable receive = new Runnable(){
-		public void run(){
-			Packet p;
-			int c;
-			String source;
+		public void run(){		
 			while(keepRunning){
-				c = 0;
-				while(receiveQueue.containsKey("Name") && !receiveQueue.get("Name").isEmpty()){
-					p = receiveQueue.get("Name").remove();
-					//DO SOMETHING WITH THIS PACKET HERE
-					source = p.getHeader().getEathrnetHeader().getSource();
-					if (list.inList(source)){
-						list.updateBuddy(source);
-					}
-					else{
-						list.add(source, p.getMessage(), hopList.getMinPacketHops(source, p.getHeader().getPacketID()));
-					}
-				}
+				loadBuddies();
 				try {
 					Thread.sleep(RECEIVE_CHECK_TIME);
 				} catch (InterruptedException e) {
@@ -51,6 +40,70 @@ public abstract class DiscNodes {
 			}
 		}
 	};
+	public boolean loadBuddies(){
+		Packet p;
+		String source;
+		while(receiveQueue.containsKey("Name") && !receiveQueue.get("Name").isEmpty()){
+			p = receiveQueue.get("Name").remove();
+			//DO SOMETHING WITH THIS PACKET HERE
+			source = p.getHeader().getEathrnetHeader().getSource();
+			if (list.inList(source)){
+				list.updateBuddy(source, p.getMessage());
+			}
+			else{
+				list.add(source, p.getMessage(), hopList.getMinPacketHops(source, p.getHeader().getPacketID()));
+			}
+		}
+		if (myAddress != null && !myAddress.equals("")){
+			EthernetHeader ackHeader;
+			Packet ack;
+			while(receiveQueue.containsKey("Pull") && !receiveQueue.get("Pull").isEmpty()){
+				p = receiveQueue.get("Pull").remove();
+				//DO SOMETHING WITH THIS PACKET HERE
+				ackHeader = new EthernetHeader(myAddress,p.getEthernetHeader().getSource());
+				ack = new Packet(ackHeader, myName);
+				ack.setMessageType("Name");
+				ack.setMaxHop(p.getMaxHop()+1);
+				ack.getHeader().setType(PacketHeader.TYPE_ACK);
+				sendPacket(ack);
+				
+				source = p.getHeader().getEathrnetHeader().getSource();
+				if (list.inList(source)){
+					list.updateBuddy(source, p.getMessage());
+				}
+				else{
+					list.add(source, p.getMessage(), hopList.getMinPacketHops(source, p.getHeader().getPacketID()));
+				}
+			}
+			
+			while(receiveQueue.containsKey("ping") && !receiveQueue.get("ping").isEmpty()){
+				p = receiveQueue.get("ping").remove();
+				//return pong message
+				ackHeader = new EthernetHeader(myAddress,p.getEthernetHeader().getSource());
+				ack = new Packet(ackHeader, "");
+				ack.setMaxHop(p.getMaxHop()+1);
+				ack.setMessageType("pong");
+				ack.getHeader().setType(PacketHeader.TYPE_PONG);
+				sendPacket(ack);
+				
+				source = p.getHeader().getEathrnetHeader().getSource();
+				if (list.inList(source)){
+					list.updateBuddy(source);
+				}
+			}
+			
+			while(receiveQueue.containsKey("pong") && !receiveQueue.get("pong").isEmpty()){
+				p = receiveQueue.get("pong").remove();
+				source = p.getHeader().getEathrnetHeader().getSource();
+				if (list.inList(source)){
+					list.updateBuddy(source);
+				}
+				Log.i("DiscNodes","pong!");
+			}
+		}
+		return true;
+	}
+	
 	protected boolean sendPacket(Packet p){
 		sendQueue.add(p);
 		return true;

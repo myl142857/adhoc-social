@@ -6,6 +6,8 @@ public class PacketHeader implements Serializable {
 	public static final String TYPE_ACK = "ack";
 	public static final String TYPE_DAT = "dat";
 	public static final String TYPE_REQ = "req";
+	public static final String TYPE_PING = "pin";
+	public static final String TYPE_PONG = "pon";
 	
 	//unique identifier for each packet from me
 	private int packetID;
@@ -30,7 +32,7 @@ public class PacketHeader implements Serializable {
 	
 	public boolean equals(PacketHeader p){
 		return (ethrHeader.equals(p.ethrHeader) && maxHop == p.maxHop &&
-				currentHop == p.currentHop && maxTime == p.maxTime &&
+				maxTime == p.maxTime &&
 				type.equals(p.type) && application.equals(p.application) &&
 				packetID == p.packetID);
 	}
