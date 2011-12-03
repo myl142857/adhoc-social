@@ -131,6 +131,7 @@ public class Chat {
 			String name;
 			Buddy b;
 			while (keepRunning){
+				checkBuddiesAlive();
 				while (receiveQueue.containsKey("Message") && !receiveQueue.get("Message").isEmpty()){
 					p = receiveQueue.get("Message").remove();
 					b = list.getBuddy(p.getEthernetHeader().getSource());
