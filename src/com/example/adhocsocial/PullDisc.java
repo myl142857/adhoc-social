@@ -18,6 +18,14 @@ public class PullDisc extends DiscNodes {
 			pullThread.start();
 		}
 	}
+	public PullDisc(Queue<Packet> sendQueue,HashMap<String,Queue<Packet>> receiveQueue, Buddylist list, String myName){
+		super(sendQueue, receiveQueue,list, myName);
+		if (PULL_MS > 0){
+			keepRunning = true;
+			pullThread = new Thread(pullDat);
+			pullThread.start();
+		}
+	}
 	protected void finalize(){
 		keepRunning = false;
 	}

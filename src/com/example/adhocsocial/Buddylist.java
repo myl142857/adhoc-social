@@ -9,7 +9,7 @@ import android.util.Log;
 public class Buddylist{
 //attributes
 	private static final int UPDATE_INTERVAL_MS = 100;
-	private static final double STALE_BUDDY_S = 120;
+	private static final double STALE_BUDDY_S = 60;
 	private volatile Queue<Packet> sendQueue;
 	private static String myAddress;
 	Hashtable<String, Buddy> bl;
@@ -135,30 +135,9 @@ public class Buddylist{
 				this.remove(buddy.getAddress());
 				Log.i("Buddylist","Removed stale buddy");
 			}
-			else if (timePassed > (refreshRate/2.0) && 
-					buddy.getLastPinged() + 10.0 < TimeKeeper.getSeconds()){
-				//ping every 10 seconds for the last half of the timeout
-				ping(buddy.getAddress());
-				Log.i("Buddylist","pinged buddy");
-			}
+			
 		}
 	
-	}
-	
-	public int ping (String address){
-		if (!inList(address)) return -1;
-		getBuddy(address).setLastPinged(TimeKeeper.getSeconds());
-		//make pingPacket
-		EthernetHeader header = new EthernetHeader(myAddress,address);
-		Packet pingPacket = new Packet(header,"");
-		pingPacket.getHeader().setType(PacketHeader.TYPE_PING);
-		pingPacket.setMessageType("ping");
-		pingPacket.setMaxHop(DiscNodes.MAX_HOPS);
-		
-		//give pingPacket to UDPSender
-		sendPacket(pingPacket);
-		
-		return pingPacket.getPacketID();
 	}
 	
 	protected boolean sendPacket(Packet p){

@@ -52,7 +52,7 @@ public class AdhocControl {
 	private UdpReceiver udpR;
 	private UdpSender udpS;
 	private Thread startThread;
-	private HopList hopList;
+	//private HopList hopList;
 	private boolean started = false;
 	private String myName;
 	
@@ -77,11 +77,11 @@ public class AdhocControl {
 		sendQueue = new LinkedList<Packet>();
 		receiveQueue = new HashMap<String, Queue<Packet>>();
 		TimeKeeper.startTimer();
-		hopList = new HopList();
+		//hopList = new HopList();
 		
 		try {
         	udpS = new UdpSender(sendQueue);
-        	udpR = new UdpReceiver(sendQueue, receiveQueue, hopList);
+        	udpR = new UdpReceiver(sendQueue, receiveQueue);
 		} catch (BindException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -133,10 +133,10 @@ public class AdhocControl {
 			udpS.startThread();
 			buddylist = new Buddylist(sendQueue);
 			if (DISCOVERY_TYPE <= 0){
-				discovery = new PushDisc(hopList,sendQueue, receiveQueue,buddylist,myName);
+				discovery = new PushDisc(sendQueue, receiveQueue,buddylist,myName);
 			}
 			else{
-				discovery = new PullDisc(hopList,sendQueue, receiveQueue,buddylist,myName);
+				discovery = new PullDisc(sendQueue, receiveQueue,buddylist,myName);
 			}
 			chat = new Chat(buddylist, sendQueue, receiveQueue, myName);
 			started = true;
@@ -175,9 +175,9 @@ public class AdhocControl {
 		return AdhocService.getMacAddress();
 	}
 	
-	public int getMinHop(String addr, int packetID){
+	/*public int getMinHop(String addr, int packetID){
 		return hopList.getMinPacketHops(addr, packetID);
-	}
+	}*/
 	
 	public boolean sendMessage(String message){
 		return chat.sendText(message);

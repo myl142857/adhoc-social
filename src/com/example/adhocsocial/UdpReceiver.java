@@ -77,6 +77,15 @@ public class UdpReceiver implements Runnable {
 		this.receiveQueue = receiveQueue;
 		this.hopList = hopList;
 	}
+	
+	public UdpReceiver(Queue<Packet> sendQueue, HashMap<String,Queue<Packet>> receiveQueue) throws SocketException, UnknownHostException, BindException {
+		int port = AdhocService.DEFAULT_PORT_BCAST;
+		mDatagramSocket = new DatagramSocket(port);
+		mDatagramSocket.setSoTimeout(0);            // Infinite timeout;
+		this.sendQueue = sendQueue;
+		this.receiveQueue = receiveQueue;
+		this.hopList = null;
+	}
 
 	public void startThread(){
 		keepRunning = true;
@@ -125,7 +134,8 @@ public class UdpReceiver implements Runnable {
 			    		!msgPacket.getEthernetHeader().getSource().equals(myAddress)){
 			    	Logger.writePacketReceived(msgPacket);
 			    	msgPacket.incrementHop();
-			    	hopList.addPacket(msgPacket.getHeader());
+			    	if (hopList != null)
+			    		hopList.addPacket(msgPacket.getHeader());
 				    if (!packetReceived(msgPacket.getHeader())){
 					    if(msgPacket.getEthernetHeader().getDestination().equals("")){
 					    	//This is a broadcast message

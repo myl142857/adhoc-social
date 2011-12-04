@@ -27,6 +27,16 @@ public abstract class DiscNodes {
 		receiveThread = new Thread(receive);
 		receiveThread.start();
 	}
+	public DiscNodes(Queue<Packet> sendQueue, HashMap<String,Queue<Packet>> receiveQueue, Buddylist list, String myName){
+		this.list = list;
+		this.hopList = null;
+		this.sendQueue = sendQueue;
+		this.myName = myName;
+		this.receiveQueue = receiveQueue;
+		keepRunning = true;
+		receiveThread = new Thread(receive);
+		receiveThread.start();
+	}
 	private Runnable receive = new Runnable(){
 		public void run(){		
 			while(keepRunning){
@@ -51,7 +61,10 @@ public abstract class DiscNodes {
 				list.updateBuddy(source, p.getMessage());
 			}
 			else{
-				list.add(source, p.getMessage(), hopList.getMinPacketHops(source, p.getHeader().getPacketID()));
+				if (hopList != null)
+					list.add(source, p.getMessage(), hopList.getMinPacketHops(source, p.getHeader().getPacketID()));
+				else
+					list.add(source, p.getMessage(), -1);
 			}
 		}
 		if (myAddress != null && !myAddress.equals("")){
@@ -72,7 +85,10 @@ public abstract class DiscNodes {
 					list.updateBuddy(source, p.getMessage());
 				}
 				else{
-					list.add(source, p.getMessage(), hopList.getMinPacketHops(source, p.getHeader().getPacketID()));
+					if (hopList != null)
+						list.add(source, p.getMessage(), hopList.getMinPacketHops(source, p.getHeader().getPacketID()));
+					else
+						list.add(source, p.getMessage(), -1);
 				}
 			}
 			

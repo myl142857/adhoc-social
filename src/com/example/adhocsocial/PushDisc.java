@@ -17,6 +17,13 @@ public class PushDisc extends DiscNodes {
 		broadcastThread.start();
 	}
 	
+	public PushDisc(Queue<Packet> sendQueue, HashMap<String,Queue<Packet>> receiveQueue, Buddylist list, String myName){
+		super(sendQueue, receiveQueue, list, myName);
+		keepRunning = true;
+		broadcastThread = new Thread(broadcast);
+		broadcastThread.start();
+	}
+	
 	protected void finalize(){
 		keepRunning = false;
 	}
