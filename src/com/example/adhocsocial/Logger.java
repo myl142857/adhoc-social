@@ -68,7 +68,7 @@ public class Logger {
 				"\tMax Hop\tCurrent Hop\tMax Time\tType\tApplication\t"+
 				"Message Type\tMessage\r\n");
 		
-        writeBuddyLine("\r\n\r\nSTART\r\n");
+        writeBuddyLine("<br><br>\r\n\r\nSTART<br>------------<br>\r\n");
         
         Log.i(TAG, "Logger started");
 		return true;
@@ -168,11 +168,11 @@ public class Logger {
 	
 	public static boolean writeBuddy(Buddy b, String color){
 		String line = "<font color=\"" + color + "\">";
-		line += "Name: " + b.getName() +"\r\n";
-		line += "Address: " + b.getAddress() + "\r\n";
-		line += "Updated At: " + Double.toString(b.getLastUpd());
-		line += "Pinged At: " + Double.toString(b.getLastPinged());
-		line += "</font>\r\n";
+		line += "Name: " + b.getName() +"<br>\r\n";
+		line += "Address: " + b.getAddress() + "<br>\r\n";
+		line += "Updated At: " + Double.toString(b.getLastUpd()) + "<br>\r\n";
+		line += "Pinged At: " + Double.toString(b.getLastPinged()) + "<br>\r\n";
+		line += "</font><br>-------------\r\n";
 		return writeBuddyLine(line);
 	}
 	
