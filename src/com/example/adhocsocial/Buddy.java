@@ -52,10 +52,12 @@ public class Buddy{
 	
 	public void update(){
 		lastTimeUpdated = TimeKeeper.getSeconds();
+		Logger.writeBuddyUpdated(this);
 	}
 	
 	public void setLastPinged(double t){
 		lastPinged = t;
+		Logger.writeBuddyPinged(this);
 	}
 	
 	public double getLastPinged(){

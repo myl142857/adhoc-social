@@ -1,12 +1,13 @@
 package com.example.adhocsocial;
 
 public class TimeKeeper{
-	private static final int MS_PER_TICK = 10;
+	public static final int MS_PER_TICK = 10;
 	private static volatile int currentTicks = 0;
 	private static volatile boolean keepRunning = false;
 	private static Thread timerThread;
 	
 	public static void startTimer(){
+		if (keepRunning) return;
 		keepRunning = true;
 		timerThread = new Thread(runMe);
 		timerThread.start();

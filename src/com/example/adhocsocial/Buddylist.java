@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class Buddylist{
 //attributes
-	private static final int UPDATE_INTERVAL_MS = 100;
+	private static final int UPDATE_INTERVAL_MS = 500;
 	private static final double STALE_BUDDY_S = 60;
 	private volatile Queue<Packet> sendQueue;
 	private static String myAddress;
@@ -49,12 +49,14 @@ public class Buddylist{
 		//address = hashtable key
 		//Buddy = hashtable value
 		bl.put(address, buddy);		
+		Logger.writeBuddyAdded(buddy);
 		//return 1 upon successful add
 		return 1;
 	}
 	
 	public Buddy remove (String address){
 		Buddy temp = bl.remove(address);
+		Logger.writeBuddyRemoved(temp);
 		return temp;
 	}
 	

@@ -76,7 +76,6 @@ public class AdhocControl {
 		Logger.startLogger();
 		sendQueue = new LinkedList<Packet>();
 		receiveQueue = new HashMap<String, Queue<Packet>>();
-		TimeKeeper.startTimer();
 		//hopList = new HopList();
 		
 		try {
@@ -147,6 +146,7 @@ public class AdhocControl {
 	public boolean startAdhoc(String name){
 		if (started) return true;
 		myName = name;
+		TimeKeeper.startTimer();
 		startThread = new Thread(startMeUp);
 		startThread.start();
 		return true;
