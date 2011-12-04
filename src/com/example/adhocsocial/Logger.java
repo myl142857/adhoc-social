@@ -83,6 +83,10 @@ public class Logger {
 		  Integer.toString(now.second);
 	}
 	
+	private static String getMS(){
+		return Integer.toString(TimeKeeper.getTicks()*TimeKeeper.MS_PER_TICK);
+	}
+	
 	public static boolean writeLine(String line){
 		if (started){
 			try {
@@ -141,9 +145,9 @@ public class Logger {
 		boolean success = true;
 		Time now = new Time();
         now.setToNow();
-        success = success && writeLine("->Packet RECEIVED " + getTime() + ", " + Integer.toString(TimeKeeper.getTicks()*TimeKeeper.MS_PER_TICK) + "\r\n" + p.toString() + "\r\n");
+        success = success && writeLine("->Packet RECEIVED " + getTime() + ", " + getMS() + "\r\n" + p.toString() + "\r\n");
 
-        success = success && writeXlsLine(getTime()+ "\t" + Integer.toString(TimeKeeper.getTicks()*TimeKeeper.MS_PER_TICK)+"\t"+p.toXlsString()+"\r\n");
+        success = success && writeXlsLine(getTime()+ "\t" + getMS()+"\t"+p.toXlsString()+"\r\n");
         return success;
 	}
 	
@@ -151,9 +155,9 @@ public class Logger {
 		boolean success = true;
 		Time now = new Time();
         now.setToNow();
-        success = success && writeLine("<-Packet SENT " + getTime() + ", " + Integer.toString(TimeKeeper.getTicks()*TimeKeeper.MS_PER_TICK) + "\r\n" + p.toString() + "\r\n");
+        success = success && writeLine("<-Packet SENT " + getTime() + ", " + getMS() + "\r\n" + p.toString() + "\r\n");
         
-        success = success && writeXlsLine(getTime()+ "\t" + Integer.toString(TimeKeeper.getTicks()*TimeKeeper.MS_PER_TICK)+"\t\t\t\t\t\t\t\t\t\t\t\t\t\t"+p.toXlsString()+"\r\n");
+        success = success && writeXlsLine(getTime()+ "\t" + getMS()+"\t\t\t\t\t\t\t\t\t\t\t\t\t\t"+p.toXlsString()+"\r\n");
         return success;
 	}
 	
@@ -161,13 +165,14 @@ public class Logger {
 		boolean success = true;
 		Time now = new Time();
         now.setToNow();
-        success = success && writeLine("Packet " + getTime()+ "\t" + Integer.toString(TimeKeeper.getTicks()*TimeKeeper.MS_PER_TICK) + ", " + Integer.toString(TimeKeeper.getTicks()) + "\r\n" + p.toString() + "\r\n");
+        success = success && writeLine("Packet " + getTime()+ "\t" + getMS() + ", " + Integer.toString(TimeKeeper.getTicks()) + "\r\n" + p.toString() + "\r\n");
 
         return success;
 	}
 	
 	public static boolean writeBuddy(Buddy b, String color){
 		String line = "<font color=\"" + color + "\">";
+		line += "Time: " +getTime()+", "+getMS()+"<br>\r\n";
 		line += "Name: " + b.getName() +"<br>\r\n";
 		line += "Address: " + b.getAddress() + "<br>\r\n";
 		line += "Updated At: " + Double.toString(b.getLastUpd()) + "<br>\r\n";
@@ -193,6 +198,6 @@ public class Logger {
 	}
 	
 	public static boolean writeWhoIsThere(){
-		return writeBuddyLine("--------------------<br>[  Who is there?  ]<br>--------------------<br>");
+		return writeBuddyLine("<font color=\"purple\">--------------------<br>[  Who is there?  ]<br>"+getTime()+", "+getMS()+"<br>--------------------</font><br>");
 	}
 }
