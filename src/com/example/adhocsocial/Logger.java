@@ -191,4 +191,8 @@ public class Logger {
 	public static boolean writeBuddyUpdated(Buddy b){
 		return writeBuddy(b, "blue");
 	}
+	
+	public static boolean writeWhoIsThere(){
+		return writeBuddyLine("--------------------<br>[  Who is there?  ]<br>--------------------<br>");
+	}
 }

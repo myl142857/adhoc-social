@@ -97,6 +97,7 @@ public class AdhocControl {
 		if (DISCOVERY_TYPE == 1 && PullDisc.PULL_MS <= 0){
 			PullDisc pull = (PullDisc) discovery;
 			pull.getBuddies();
+			Logger.writeWhoIsThere();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
