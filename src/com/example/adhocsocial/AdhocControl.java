@@ -42,7 +42,9 @@ public class AdhocControl {
 	 * 0: broadcast
 	 * 1: who is there?
 	 */
-	public static final int DISCOVERY_TYPE = 1;
+	public static final int TYPE_BROADCAST = 0;
+	public static final int TYPE_PULL = 1;
+	private int discoveryType = 1;
 	
 	private volatile Queue<Packet> sendQueue;
 	private volatile HashMap<String,Queue<Packet>> receiveQueue;
@@ -56,7 +58,6 @@ public class AdhocControl {
 	private boolean started = false;
 	private String myName;
 	
-	private static Packet receivedPacket;
 	private DiscNodes discovery;
 	private Chat chat;
 	
@@ -94,7 +95,7 @@ public class AdhocControl {
 	}
 	
 	public void refreshBuddyList(){
-		if (DISCOVERY_TYPE == 1 && PullDisc.PULL_MS <= 0){
+		if (discoveryType == TYPE_PULL && PullDisc.PULL_MS <= 0){
 			Logger.writeWhoIsThere();
 			PullDisc pull = (PullDisc) discovery;
 			pull.getBuddies();
@@ -132,7 +133,7 @@ public class AdhocControl {
 			udpR.startThread();
 			udpS.startThread();
 			buddylist = new Buddylist(sendQueue);
-			if (DISCOVERY_TYPE <= 0){
+			if (discoveryType == TYPE_BROADCAST){
 				discovery = new PushDisc(sendQueue, receiveQueue,buddylist,myName);
 			}
 			else{
@@ -239,5 +240,9 @@ public class AdhocControl {
 		}
 		else
 			return false;
+	}
+	
+	public void setDiscoveryType(int type){
+		discoveryType = type;
 	}
 }

@@ -71,11 +71,12 @@ public class AdhocTrialActivity extends Activity {
         
         startButton.setOnClickListener(new View.OnClickListener(){
         	public void onClick(View v){
-        		startAdhocService();
-        		control.startAdhoc(txtName.getText().toString());
-        		refreshControls.run();
-        		textUpdate = new Thread(update);
-        		textUpdate.start();
+        		String items[] = {"Broadcast", "Pull"};
+        		AlertDialog.Builder builder = new AlertDialog.Builder(me);
+				builder.setTitle("Select Mode");
+				builder.setItems(items,dlgType);
+				AlertDialog alert = builder.create();
+				builder.show();
         	}
         });
         
@@ -167,6 +168,21 @@ public class AdhocTrialActivity extends Activity {
 		public void onClick(DialogInterface dialog, int which) {
 			// TODO Auto-generated method stub
 			control.indexSelected(which);
+		}
+	};
+	
+	private OnClickListener dlgType = new DialogInterface.OnClickListener() {
+		
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			// TODO Auto-generated method stub
+			final EditText txtName = (EditText)findViewById(R.id.nameEntry);
+			control.setDiscoveryType(which);
+			startAdhocService();
+    		control.startAdhoc(txtName.getText().toString());
+    		refreshControls.run();
+    		textUpdate = new Thread(update);
+    		textUpdate.start();
 		}
 	};
     
