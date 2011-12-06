@@ -1,9 +1,14 @@
 package com.example.adhocsocial;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.BindException;
 import java.net.SocketException;
@@ -67,6 +72,8 @@ public class AdhocControl {
 	
 	private boolean refreshMe = false;
 	
+	private String defaultName;
+	
 	public static AdhocControl startControl(){
 		if (control == null)
 			control = new AdhocControl();
@@ -78,6 +85,7 @@ public class AdhocControl {
 		sendQueue = new LinkedList<Packet>();
 		receiveQueue = new HashMap<String, Queue<Packet>>();
 		//hopList = new HopList();
+		loadDefaultName();
 		
 		try {
         	udpS = new UdpSender(sendQueue);
@@ -92,6 +100,38 @@ public class AdhocControl {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private void loadDefaultName(){
+		java.io.File file = new java.io.File("/sdcard" , "defaultname.txt");
+		if (file.exists()) {
+			try{
+				FileInputStream fstream = new FileInputStream("/sdcard/defaultname.txt");
+				DataInputStream in = new DataInputStream(fstream);
+				BufferedReader br = new BufferedReader(new InputStreamReader(in));
+				String strLine;
+				strLine = br.readLine();
+				if (strLine != null)
+					defaultName = strLine;
+				else
+					defaultName = "";
+				in.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				defaultName = "";
+			}catch (IOException e) {
+				e.printStackTrace();
+				defaultName = "";
+			}
+		}
+		else{
+			defaultName = "";
+		}
+	}
+	
+	public String getDefaultName(){
+		return defaultName;
 	}
 	
 	public void refreshBuddyList(){

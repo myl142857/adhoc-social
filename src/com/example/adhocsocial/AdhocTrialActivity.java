@@ -69,6 +69,10 @@ public class AdhocTrialActivity extends Activity {
         
         refreshControls.run();
         
+        if (txtName.getText().toString().equals("")){
+        	txtName.setText(control.getDefaultName());
+        }
+        
         startButton.setOnClickListener(new View.OnClickListener(){
         	public void onClick(View v){
         		String items[] = {"Broadcast", "Pull"};
