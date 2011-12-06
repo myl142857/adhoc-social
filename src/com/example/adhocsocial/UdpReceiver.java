@@ -23,7 +23,12 @@ package com.example.adhocsocial;
 
 //This class was edited from the original class created for the Posit mobile project
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -67,6 +72,9 @@ public class UdpReceiver implements Runnable {
 	private Queue<Object[]> receivedQueue = new LinkedList<Object[]>();
 	private HopList hopList;
 	
+	private boolean acceptAll = true;
+	private LinkedList<String> receiveList;
+	
 	private static String myAddress="";
 
 	public UdpReceiver(Queue<Packet> sendQueue, HashMap<String,Queue<Packet>> receiveQueue, HopList hopList) throws SocketException, UnknownHostException, BindException {
@@ -76,6 +84,7 @@ public class UdpReceiver implements Runnable {
 		this.sendQueue = sendQueue;
 		this.receiveQueue = receiveQueue;
 		this.hopList = hopList;
+		setupReceiveAddresses();
 	}
 	
 	public UdpReceiver(Queue<Packet> sendQueue, HashMap<String,Queue<Packet>> receiveQueue) throws SocketException, UnknownHostException, BindException {
@@ -85,6 +94,43 @@ public class UdpReceiver implements Runnable {
 		this.sendQueue = sendQueue;
 		this.receiveQueue = receiveQueue;
 		this.hopList = null;
+		setupReceiveAddresses();
+	}
+	
+	//used for testing
+	private void setupReceiveAddresses(){
+		java.io.File file = new java.io.File("/sdcard" , "receive.txt");
+        if (file.exists()) {
+        	acceptAll = false;
+        	receiveList = new LinkedList<String>();
+        	FileInputStream fstream = null;
+        	try {
+				fstream = new FileInputStream("/sdcard/receive.txt");
+				DataInputStream in = new DataInputStream(fstream);
+				BufferedReader br = new BufferedReader(new InputStreamReader(in));
+				String strLine;
+				while ((strLine = br.readLine()) != null)   {
+					receiveList.add(strLine);
+				}
+				in.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				acceptAll=true;
+			}catch (IOException e) {
+				e.printStackTrace();
+				acceptAll=true;
+			}
+			
+        }
+	}
+	
+	private boolean inReceiveList(String addr){
+		if (acceptAll) return true;
+		for (int i = 0; i < receiveList.size(); i++){
+			if (addr.equals(receiveList.get(i))) return true;
+		}
+		return false;
 	}
 
 	public void startThread(){
@@ -129,26 +175,29 @@ public class UdpReceiver implements Runnable {
 			     * If the packet we receive is for us, put in receive queue
 				 * If the packet we receive is not for us, put in send queue (to be forwarded)
 				 */
-			    String s = msgPacket.getEthernetHeader().getSource();
-			    if (!msgPacket.getEthernetHeader().getSentFrom().equals(myAddress) && 
-			    		!msgPacket.getEthernetHeader().getSource().equals(myAddress)){
-			    	Logger.writePacketReceived(msgPacket);
-			    	msgPacket.incrementHop();
-			    	if (hopList != null)
-			    		hopList.addPacket(msgPacket.getHeader());
-				    if (!packetReceived(msgPacket.getHeader())){
-					    if(msgPacket.getEthernetHeader().getDestination().equals("")){
-					    	//This is a broadcast message
-					    	addToReceiveList(msgPacket);
-					    	sendQueue.add(msgPacket);
-					    }
-					    else
-					    {
-							if (msgPacket.getEthernetHeader().getDestination().equals(myAddress))
-								addToReceiveList(msgPacket);
-							else{
-								sendQueue.add(msgPacket);
-							}
+			    String sentFrom = msgPacket.getEthernetHeader().getSentFrom();
+			    if (inReceiveList(sentFrom)){
+				    String s = msgPacket.getEthernetHeader().getSource();
+				    if (!msgPacket.getEthernetHeader().getSentFrom().equals(myAddress) && 
+				    		!msgPacket.getEthernetHeader().getSource().equals(myAddress)){
+				    	Logger.writePacketReceived(msgPacket);
+				    	msgPacket.incrementHop();
+				    	if (hopList != null)
+				    		hopList.addPacket(msgPacket.getHeader());
+					    if (!packetReceived(msgPacket.getHeader())){
+						    if(msgPacket.getEthernetHeader().getDestination().equals("")){
+						    	//This is a broadcast message
+						    	addToReceiveList(msgPacket);
+						    	sendQueue.add(msgPacket);
+						    }
+						    else
+						    {
+								if (msgPacket.getEthernetHeader().getDestination().equals(myAddress))
+									addToReceiveList(msgPacket);
+								else{
+									sendQueue.add(msgPacket);
+								}
+						    }
 					    }
 				    }
 			    }
