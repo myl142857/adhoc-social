@@ -41,11 +41,8 @@ import android.widget.Toast;
 public class AdhocTrialActivity extends Activity {
 	private volatile AdhocControl control;
 	final Handler mHandler = new Handler();
-	private volatile boolean runCheck = false;
-	private volatile String msg;
-	private Thread checkThread;
 	private AdhocTrialActivity me;
-	private Thread textUpdate;
+	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,6 +65,8 @@ public class AdhocTrialActivity extends Activity {
         final ListView lstBuddies = (ListView)findViewById(R.id.lstBuddies);
         
         refreshControls.run();
+        if (control.getKeepRunning())
+        	control.startUpdateThread(update);
         
         if (txtName.getText().toString().equals("")){
         	txtName.setText(control.getDefaultName());
@@ -183,16 +182,15 @@ public class AdhocTrialActivity extends Activity {
 			final EditText txtName = (EditText)findViewById(R.id.nameEntry);
 			control.setDiscoveryType(which);
 			startAdhocService();
-    		control.startAdhoc(txtName.getText().toString());
+    		control.startAdhoc(txtName.getText().toString(), update);
     		refreshControls.run();
-    		textUpdate = new Thread(update);
-    		textUpdate.start();
 		}
 	};
     
     private Runnable update = new Runnable(){
     	public void run(){
-    		while (true){
+    		mHandler.post(setText);
+    		while (control.getKeepRunning()){
     			if (control.canRefresh())
     				mHandler.post(refreshControls);
 	    		if (control.chatUpdated()){

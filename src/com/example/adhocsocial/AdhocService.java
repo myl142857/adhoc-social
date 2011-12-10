@@ -60,6 +60,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * This class was edited from the original class created for the Posit mobile project
@@ -286,6 +287,14 @@ public class AdhocService extends Service {
 		}
 	}
 
+	private void showToast(String text){
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+
+		Toast toast = Toast.makeText(context, text, duration);
+		toast.show();
+	}
+	
 	/**
 	 * Performs all the methods required to start the phone in ADHOC_MODE. 
 	 * This mode requires root access.  If the phone has root access, the
@@ -320,6 +329,8 @@ public class AdhocService extends Service {
 		}
 		else {
 			Log.i(TAG, "This phone IS NOT ROOTED");
+			showToast("PHONE NOT ROOTED!");
+			return false;
 		}
 
 		Log.i(TAG, "Disabling wifi");
@@ -356,7 +367,13 @@ public class AdhocService extends Service {
 		Log.i(TAG, "Starting Wifi");
 		ok = mCoretask.runRootCommand("ifconfig tiwlan0 up");
 		Log.i(TAG, "Started Wifi ... ok = " + ok);
-		started = true;
+		started = ok;
+		if (ok){
+			showToast("WiFi Activated");
+		}
+		else{
+			showToast("Error starting WiFi");
+		}
 		return ok;  
 	}
 

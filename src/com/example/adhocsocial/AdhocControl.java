@@ -59,6 +59,9 @@ public class AdhocControl {
 	private UdpReceiver udpR;
 	private UdpSender udpS;
 	private Thread startThread;
+	private Thread textUpdate = null;
+	private boolean keepRunning = false;
+	private Runnable update;
 	//private HopList hopList;
 	private boolean started = false;
 	private String myName;
@@ -170,6 +173,10 @@ public class AdhocControl {
 				}
 				currentTime+=10;
 			}
+			if (currentTime >= timeout){
+				//timed out
+				return;
+			}
 			udpR.startThread();
 			udpS.startThread();
 			buddylist = new Buddylist(sendQueue);
@@ -182,13 +189,15 @@ public class AdhocControl {
 			chat = new Chat(buddylist, sendQueue, receiveQueue, myName);
 			started = true;
 			refreshMe = true;
+			startUpdateThread(update);
 		}
 	};
 	
-	public boolean startAdhoc(String name){
+	public boolean startAdhoc(String name, Runnable r){
 		if (started) return true;
 		myName = name;
 		TimeKeeper.startTimer();
+		update = r;
 		startThread = new Thread(startMeUp);
 		startThread.start();
 		return true;
@@ -284,5 +293,31 @@ public class AdhocControl {
 	
 	public void setDiscoveryType(int type){
 		discoveryType = type;
+	}
+	
+	public void startUpdateThread(Runnable r){
+		stopUpdateThread();
+		keepRunning = true;
+		textUpdate = new Thread(r);
+		textUpdate.start();
+	}
+	
+	public boolean getKeepRunning(){
+		return keepRunning;
+	}
+	
+	
+	public void stopUpdateThread(){
+		keepRunning = false;
+		if (textUpdate != null && textUpdate.isAlive()){
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if (textUpdate.isAlive())
+				textUpdate.interrupt();
+		}
 	}
 }
